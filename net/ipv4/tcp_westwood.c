@@ -43,8 +43,12 @@ struct westwood {
 };
 
 /* TCP Westwood functions and constants */
-#define TCP_WESTWOOD_RTT_MIN   (HZ/18)	/* 55.55ms */
-#define TCP_WESTWOOD_INIT_RTT  (18*HZ)	/* maybe too conservative?! */
+int tcp_westwood_rtt_min = 22;
+int tcp_westwood_init_rtt = 18;
+
+/* Let's make them tunable */
+module_param_named(rtt_min, tcp_westwood_rtt_min, int, 0644);
+module_param_named(rtt_init, tcp_westwood_init_rtt, int, 0644);
 
 /*
  * @tcp_westwood_create
@@ -69,7 +73,7 @@ static void tcp_westwood_init(struct sock *sk)
 	w->cumul_ack = 0;
 	w->reset_rtt_min = 1;
 	w->rtt_min = w->rtt = msecs_to_jiffies(tcp_westwood_init_rtt);
-	w->rtt_win_sx = tcp_jiffies32;
+	w->rtt_win_sx = tcp_time_stamp;
 	w->snd_una = tcp_sk(sk)->snd_una;
 	w->first_ack = 1;
 }
