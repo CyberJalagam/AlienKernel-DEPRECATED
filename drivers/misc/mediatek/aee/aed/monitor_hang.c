@@ -1428,8 +1428,8 @@ static void show_bt_by_pid(int task_pid)
 		put_task_struct(p);
 	} else if (p != NULL) {
 		put_task_struct(p);
-		Log2HangInfo("%s pid %d state %d, flags %d. stack is null.\n",
-			t->comm, task_pid, t->state, t->flags);
+		Log2HangInfo("%s pid %d state %d. stack is null.\n",
+			t->comm, task_pid, t->state);
 	}
 	put_pid(pid);
 }
