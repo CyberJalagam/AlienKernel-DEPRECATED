@@ -33,7 +33,7 @@
 static struct imgsensor_info_struct imgsensor_info = {
 	.sensor_id = OV13870_SENSOR_ID,	/* record sensor id defined in kd_imgsensor.h */
 
-	.checksum_value = 0x88cabb15,
+	.checksum_value = 0x9f0c4d84,
 
 	.pre = {
 		.pclk = 180036000,	/* record different mode's pclk */
@@ -41,8 +41,8 @@ static struct imgsensor_info_struct imgsensor_info = {
 		.framelength = 3334,	/* record different mode's framelength */
 		.startx = 0,	/* record different mode's startx of grabwindow */
 		.starty = 0,	/* record different mode's starty of grabwindow */
-		.grabwindow_width = 2112,	/* record different mode's width of grabwindow */
-		.grabwindow_height = 1568,	/* record different mode's height of grabwindow */
+		.grabwindow_width = 1280,	/* record different mode's width of grabwindow */
+		.grabwindow_height = 960,	/* record different mode's height of grabwindow */
 		.mipi_data_lp2hs_settle_dc = 85,
 		.max_framerate = 300,
 	},
@@ -50,10 +50,10 @@ static struct imgsensor_info_struct imgsensor_info = {
 		.pclk = 180036000,	/* record different mode's pclk */
 		.linelength = 1800,	/* record different mode's linelength */
 		.framelength = 3334,	/* record different mode's framelength */
-		.startx = 16,	/* record different mode's startx of grabwindow */
+		.startx = 0,	/* record different mode's startx of grabwindow */
 		.starty = 0,	/* record different mode's starty of grabwindow */
-		.grabwindow_width = 4192,	/* record different mode's width of grabwindow */
-		.grabwindow_height = 3136,	/* record different mode's height of grabwindow */
+		.grabwindow_width = 2560,	/* record different mode's width of grabwindow */
+		.grabwindow_height = 1920,	/* record different mode's height of grabwindow */
 		.mipi_data_lp2hs_settle_dc = 85,
 		.max_framerate = 300,
 	},
@@ -63,8 +63,8 @@ static struct imgsensor_info_struct imgsensor_info = {
 		.framelength = 3334,	/* record different mode's framelength */
 		.startx = 0,	/* record different mode's startx of grabwindow */
 		.starty = 0,	/* record different mode's starty of grabwindow */
-		.grabwindow_width = 4224,	/* record different mode's width of grabwindow */
-		.grabwindow_height = 2376,	/* record different mode's height of grabwindow */
+		.grabwindow_width = 2560,	/* record different mode's width of grabwindow */
+		.grabwindow_height = 1920,	/* record different mode's height of grabwindow */
 		.mipi_data_lp2hs_settle_dc = 85,
 		.max_framerate = 300,
 	},
@@ -180,7 +180,7 @@ static struct imgsensor_info_struct imgsensor_info = {
 	.i2c_addr_table = {0x20, 0x6c, 0xff},	/* record sensor support all write id addr,
 						 * only supprt 4, must end with 0xff
 						 */
-	.i2c_speed = 1000,	/* i2c read/write speed */
+	.i2c_speed = 400,	/* i2c read/write speed */
 };
 
 
@@ -208,9 +208,9 @@ static struct imgsensor_struct imgsensor = {
 
 /* Sensor output window information*/
 static SENSOR_WINSIZE_INFO_STRUCT imgsensor_winsize_info[10] = {
-	{4224, 3136, 0, 0, 4224, 3136, 2112, 1568, 0, 0, 2112, 1568, 0, 0, 2112, 1568},	/* Preview */
-	{4224, 3136, 0, 0, 4224, 3136, 4224, 3136, 0, 0, 4224, 3136, 16, 0, 4192, 3136},/* capture */
-	{4224, 3136, 0, 0, 4224, 3136, 4224, 3136, 0, 0, 4224, 2376, 0, 0, 4224, 2376},	/* video */
+	{4224, 3136, 0, 0, 4224, 3136, 1280, 960, 0, 0, 1280, 960, 0, 0, 1280, 960},	/* Preview */
+	{4224, 3136, 0, 0, 4224, 3136, 2560, 1920, 0, 0, 2560, 1920, 0, 0, 2560, 1920},	/* capture */
+	{4224, 3136, 0, 0, 4224, 3136, 2560, 1920, 0, 0, 2560, 1920, 0, 0, 2560, 1920},	/* video */
 	{4224, 3136, 0, 0, 4224, 3136, 1056, 784, 0, 0, 1056, 784, 0, 0, 1056, 784},	/* hight speed video */
 	{4224, 3136, 0, 0, 4224, 3136, 1056, 784, 0, 0, 1056, 784, 0, 0, 1056, 784},	/* slim video */
 	{4224, 3136, 0, 0, 4224, 3136, 2112, 1568, 0, 0, 2112, 1568, 0, 0, 2112, 1568},	/* Custom1 */
@@ -228,19 +228,19 @@ static SENSOR_VC_INFO_STRUCT SENSOR_VC_INFO[10] = {
 	/* Preview mode setting */
 	{
 		0x02, 0x0A, 0x00, 0x08, 0x40, 0x00,
-		0x00, 0x2B, 0x0840, 0x0620, 0x00, 0x00, 0x0000, 0x0000,
+		0x00, 0x2B, 0x0500, 0x03C0, 0x00, 0x00, 0x0000, 0x0000,
 		0x00, 0x00, 0x0000, 0x0000, 0x00, 0x00, 0x0000, 0x0000
 	},
 	/* Capture mode setting */
 	{
 		0x02, 0x0A, 0x00, 0x08, 0x40, 0x00,
-		0x00, 0x2B, 0x1080, 0x0C40, 0x00, 0x00, 0x0000, 0x0000,
+		0x00, 0x2B, 0x0A00, 0x0780, 0x00, 0x00, 0x0000, 0x0000,
 		0x01, 0x2B, 0x0140, 0x0300, 0x00, 0x00, 0x0000, 0x0000
 	},
 	/* Video mode setting */
 	{
 		0x02, 0x0A, 0x00, 0x08, 0x40, 0x00,
-		0x00, 0x2B, 0x1070, 0x0C30, 0x00, 0x00, 0x0000, 0x0000,
+		0x00, 0x2B, 0x0A00, 0x0780, 0x00, 0x00, 0x0000, 0x0000,
 		0x00, 0x00, 0x0000, 0x0000, 0x00, 0x00, 0x0000, 0x0000
 	},
 	/* HS Video mode setting */
