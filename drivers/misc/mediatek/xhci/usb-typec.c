@@ -32,9 +32,6 @@
 #include <linux/mutex.h>
 static struct notifier_block otg_nb;
 static struct tcpc_device *otg_tcpc_dev;
-static struct mutex tcpc_otg_lock;
-static bool tcpc_otg_attached;
-
 struct tcpc_otg_work {
 	struct delayed_work dwork;
 	int ops;
@@ -175,10 +172,6 @@ static void issue_otg_work(int ops, int delay)
 
 static void tcpc_otg_enable(bool enable)
 {
-	mutex_lock(&tcpc_otg_lock);
-	tcpc_otg_attached = (enable ? true : false);
-	mutex_unlock(&tcpc_otg_lock);
-
 	if (enable)
 		issue_otg_work(OTG_OPS_ON, 0);
 	else
@@ -219,35 +212,13 @@ static int otg_tcp_notifier_call(struct notifier_block *nb,
 			else
 				usb3_switch_ctrl_sel(CC1_SIDE);
 #endif
-		} else if ((noti->typec_state.old_state == TYPEC_ATTACHED_SRC ||
-			noti->typec_state.old_state == TYPEC_ATTACHED_SNK) &&
-			noti->typec_state.new_state == TYPEC_UNATTACHED) {
-			if (otg_on) {
-				pr_info("%s OTG Plug out\n", __func__);
-				tcpc_otg_enable(false);
-			} else {
-				pr_info("%s USB Plug out\n", __func__);
-				mt_usb_disconnect();
-			}
+		} else if (noti->typec_state.old_state == TYPEC_ATTACHED_SRC &&
+				noti->typec_state.new_state == TYPEC_UNATTACHED) {
+			pr_info("%s OTG Plug out\n", __func__);
+			tcpc_otg_enable(false);
 #ifdef CONFIG_USB_C_SWITCH_U3_MUX
 			usb3_switch_dps_en(true);
 #endif
-		}
-		break;
-	case TCP_NOTIFY_DR_SWAP:
-		pr_info("%s TCP_NOTIFY_DR_SWAP, new role=%d\n",
-				__func__, noti->swap_state.new_role);
-		if (otg_on &&
-			noti->swap_state.new_role == PD_ROLE_UFP) {
-			pr_info("%s switch role to device\n", __func__);
-			tcpc_otg_enable(false);
-			mt_usb_connect();
-		} else if (!otg_on &&
-			noti->swap_state.new_role == PD_ROLE_DFP) {
-			pr_info("%s switch role to host\n", __func__);
-			mt_usb_disconnect();
-			mt_usb_dev_off();
-			tcpc_otg_enable(true);
 		}
 		break;
 	}
@@ -270,8 +241,6 @@ static int __init rt_typec_init(void)
 #endif
 
 #ifdef CONFIG_TCPC_CLASS
-	mutex_init(&tcpc_otg_lock);
-
 	otg_tcpc_dev = tcpc_dev_get_by_name("type_c_port0");
 	if (!otg_tcpc_dev) {
 		pr_err("%s get tcpc device type_c_port0 fail\n", __func__);
