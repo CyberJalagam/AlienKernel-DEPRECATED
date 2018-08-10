@@ -515,6 +515,14 @@ static void _mtk_xhci_driver_unload(bool vbus_off)
 	}
 
 	mtk_xhci_hcd_cleanup();
+
+	if (mtk_dualrole_stat == DUALROLE_DEVICE) {
+		mtk_xhci_mtk_printk(K_ALET,
+				"current is DUALROLE_DEVICE\n");
+		return;
+	}
+
+	mtk_xhci_hcd_cleanup();
 #ifndef VENDOR_EDIT
 /* Qiao.Hu@BSP.BaseDrv.CHG.Basic, 2017/11/19, Add for otg */
 	if (vbus_off)
