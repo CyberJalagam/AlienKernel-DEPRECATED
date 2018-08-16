@@ -144,7 +144,7 @@ int ps_data_report(int value, int status)
 	memset(&event, 0, sizeof(struct sensor_event));
 
 	__pm_wakeup_event(&alsps_context_obj->ps_wake_lock, msecs_to_jiffies(100));
-
+	pr_notice("[ALS/PS]ps_data_report! %d, %d\n", value, status);
 	event.flush_action = DATA_ACTION;
 	event.word[0] = value + 1;
 #ifdef VENDOR_EDIT

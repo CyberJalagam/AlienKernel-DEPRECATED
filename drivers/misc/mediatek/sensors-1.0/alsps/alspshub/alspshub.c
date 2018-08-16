@@ -16,7 +16,6 @@
 #include <hwmsensor.h>
 #include <SCP_sensorHub.h>
 #include "SCP_power_monitor.h"
-#include <linux/pm_wakeup.h>
 
 #ifdef VENDOR_EDIT
 /*Fei.Mo@PSW.BSP.Sensor, 2017/12/17, Add for get sensor_devinfo*/
