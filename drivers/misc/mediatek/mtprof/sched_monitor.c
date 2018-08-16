@@ -323,10 +323,9 @@ static void event_duration_check(struct sched_block_event *b)
 					sched_mon_msg(buf2, TO_BOTH);
 				}
 			}
-			if (t_dur > AEE_COMMON_DUR
-				&& b->last_event != RCU_SOFTIRQ) {
-				sched_monitor_aee(b->type, buf);
-			}
+			if (t_dur > AEE_WARN_DUR
+				&& b->last_event != RCU_SOFTIRQ)
+				sched_monitor_aee(b->type, buf, b);
 		}
 		if (b->preempt_count != preempt_count()) {
 			snprintf(buf, sizeof(buf),
@@ -561,9 +560,9 @@ static void softirq_event_duration_check(struct sched_block_event *b)
 					sec_high(b->last_te),
 					sec_low(b->last_te));
 				sched_mon_msg(buf, TO_BOTH);
-				if (t_dur > (AEE_COMMON_DUR - BUFFER_TIME)) {
+				if (t_dur > (AEE_WARN_DUR - TIME_10MS)) {
 					aee_buf = "";
-					sched_monitor_aee(evt_SOFTIRQ, buf);
+					sched_monitor_aee(evt_SOFTIRQ, buf, b);
 				}
 			}
 		}
