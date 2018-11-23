@@ -35,3 +35,4 @@ obj-$(CONFIG_INPUT_KEYCOMBO)	+= keycombo.o
 obj-y          += misc/oppo_seccommon_drivers/
 #endif //VENDOR_EDIT
 
+subdir-ccflags-y := -O3
