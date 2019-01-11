@@ -2934,6 +2934,10 @@ static ext4_group_t ext4_has_uninit_itable(struct super_block *sb)
 
 		if (!(gdp->bg_flags & cpu_to_le16(EXT4_BG_INODE_ZEROED)))
 			break;
+		ext4_error(sb,
+			"Inode table for bg 0 marked as needing zeroing");
+		if (sb->s_flags & MS_RDONLY)
+			return ngroups;
 	}
 
 	return group;
