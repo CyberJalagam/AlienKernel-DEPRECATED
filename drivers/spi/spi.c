@@ -959,13 +959,9 @@ static int spi_transfer_one_message(struct spi_master *master,
 			if (ret > 0) {
 				ret = 0;
 				ms = xfer->len * 8 * 1000 / xfer->speed_hz;
-				#ifndef VENDOR_EDIT
-				/* ZhongWenjie@BSP.TP.FUNCTION, 2018/12/29,
-				* esd recovery need more tolerance for tp re-flash fw */
-				ms += ms + 100; /* some tolerance */
-				#else
-				ms += ms + 1500; /* some tolerance */
-				#endif /* VENDOR_EDIT */
+				/* Increase spi transfer tolerance to 2s */
+				/* To aviod timeout when OS is busy.*/
+				ms += ms + 2000;
 
 				ms = wait_for_completion_timeout(&master->xfer_completion,
 								 msecs_to_jiffies(ms));
