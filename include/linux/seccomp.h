@@ -36,7 +36,6 @@ static inline int secure_computing(const struct seccomp_data *sd)
 		return  __secure_computing(sd);
 	return 0;
 }
-
 #else
 extern void secure_computing_strict(int this_syscall);
 #endif
