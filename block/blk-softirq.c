@@ -116,7 +116,8 @@ void __blk_complete_request(struct request *req)
 
 	/*
 	 * Select completion CPU
-         *
+     *
+	 *
 	 * Refrain from waking up an idle CPU if possible since the exit
 	 * latency of taking req->cpu out of an idle cstate will likely
 	 * exceed the rq->deadline constraint compared to executing the
