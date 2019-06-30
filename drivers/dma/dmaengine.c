@@ -949,6 +949,9 @@ int dma_async_device_register(struct dma_device *device)
 	if (!chancnt)
 		kfree(idr_ref);
 
+	if (!chancnt)
+		kfree(idr_ref);
+
 	return 0;
 
 err_out:
