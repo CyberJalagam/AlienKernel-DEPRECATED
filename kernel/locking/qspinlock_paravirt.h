@@ -144,6 +144,19 @@ static struct pv_node *pv_unhash(struct qspinlock *lock)
 }
 
 /*
+ * Return true if when it is time to check the previous node which is not
+ * in a running state.
+ */
+static inline bool
+pv_wait_early(struct pv_node *prev, int loop)
+{
+	if ((loop & PV_PREV_CHECK_MASK) != 0)
+		return false;
+
+	return READ_ONCE(prev->state) != vcpu_running;
+}
+
+/*
  * Initialize the PV part of the mcs_spinlock node.
  */
 static void pv_init_node(struct mcs_spinlock *node)
