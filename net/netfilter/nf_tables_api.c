@@ -2732,9 +2732,12 @@ static int nf_tables_newset(struct net *net, struct sock *nlsk,
 			      NFT_SET_INTERVAL | NFT_SET_TIMEOUT |
 			      NFT_SET_MAP | NFT_SET_EVAL))
 			return -EINVAL;
-		/* Only one of both operations is supported */
-		if ((flags & (NFT_SET_MAP | NFT_SET_EVAL)) ==
-			     (NFT_SET_MAP | NFT_SET_EVAL))
+		/* Only one of these operations is supported */
+		if ((flags & (NFT_SET_MAP | NFT_SET_OBJECT)) ==
+			     (NFT_SET_MAP | NFT_SET_OBJECT))
+			return -EOPNOTSUPP;
+		if ((flags & (NFT_SET_EVAL | NFT_SET_OBJECT)) ==
+			     (NFT_SET_EVAL | NFT_SET_OBJECT))
 			return -EOPNOTSUPP;
 	}
 
