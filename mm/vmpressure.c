@@ -268,25 +268,6 @@ static void vmpressure_memcg(gfp_t gfp, struct mem_cgroup *memcg,
 	BUG_ON(!vmpr);
 
 	/*
-	 * For low (free + cached), vmpressure window should be
-	 * small, and high for higher values of (free + cached).
-	 * But it should not be linear as well. This ensures
-	 * timely vmpressure notifications when system is under
-	 * memory pressure, and optimal number of events when
-	 * cached is high. The sqaure root function is empirically
-	 * found to serve the purpose.
-	 */
-	return int_sqrt(x);
-}
-
-static void vmpressure_memcg(gfp_t gfp, struct mem_cgroup *memcg, bool critical,
-			     unsigned long scanned, unsigned long reclaimed)
-{
-	struct vmpressure *vmpr = memcg_to_vmpressure(memcg);
-
-	BUG_ON(!vmpr);
-
-	/*
 	 * If we got here with no pages scanned, then that is an indicator
 	 * that reclaimer was unable to find any shrinkable LRUs at the
 	 * current scanning depth. But it does not mean that we should
@@ -339,9 +320,6 @@ static void vmpressure_global(gfp_t gfp, unsigned long scanned,
 	struct vmpressure *vmpr = &global_vmpressure;
 	unsigned long pressure;
 	unsigned long stall;
-
-	if (!(gfp & (__GFP_HIGHMEM | __GFP_MOVABLE | __GFP_IO | __GFP_FS)))
-		return;
 
 	if (!scanned)
 		return;
