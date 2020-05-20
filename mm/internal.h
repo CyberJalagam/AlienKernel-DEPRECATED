@@ -183,6 +183,7 @@ extern void prep_compound_page(struct page *page, unsigned int order);
 extern bool is_free_buddy_page(struct page *page);
 #endif
 extern int user_min_free_kbytes;
+extern atomic_long_t kswapd_waiters;
 
 #ifdef CONFIG_CMA
 static inline int is_cma_page(struct page *page)
