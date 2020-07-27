@@ -1559,6 +1559,14 @@ int serial8250_handle_irq(struct uart_port *port, unsigned int iir)
 	spin_lock_irqsave(&port->lock, flags);
 
 	status = serial_port_in(port, UART_LSR);
+#ifndef CONFIG_FIQ_DEBUGGER
+#ifdef CONFIG_MTK_ENG_BUILD
+#ifdef CONFIG_MTK_PRINTK_UART_CONSOLE
+	if (uart_console(port) && (serial_port_in(port, UART_LSR) & 0x01))
+		printk_disable_uart = 0;
+#endif
+#endif
+#endif
 
 	DEBUG_INTR("status = %x...", status);
 
@@ -2234,8 +2242,6 @@ static unsigned int
 serial8250_get_baud_rate(struct uart_port *port, struct ktermios *termios,
 			 struct ktermios *old)
 {
-	unsigned int tolerance = port->uartclk / 100;
-
 	/*
 	 * Ask the core to calculate the divisor for us.
 	 * Allow 1% tolerance at the upper limit so uart clks marginally
@@ -2244,7 +2250,7 @@ serial8250_get_baud_rate(struct uart_port *port, struct ktermios *termios,
 	 */
 	return uart_get_baud_rate(port, termios, old,
 				  port->uartclk / 16 / 0xffff,
-				  (port->uartclk + tolerance) / 16);
+				  port->uartclk);
 }
 
 void

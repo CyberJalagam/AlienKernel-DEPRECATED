@@ -140,6 +140,18 @@
 
 #include "net-sysfs.h"
 
+#include <net/udp.h>
+#ifdef UDP_SKT_WIFI
+#include <linux/trace_events.h>
+#endif
+
+#ifdef VENDOR_EDIT
+//Junyuan.Huang@PSW.CN.WiFi.Network.1471780, 2018/06/26,
+//Add for limit speed function
+#if defined(CONFIG_IMQ) || defined(CONFIG_IMQ_MODULE)
+#include <linux/imq.h>
+#endif
+#endif /* VENDOR_EDIT */
 /* Instead of increasing this, you should create a hash table. */
 #define MAX_GRO_SKBS 8
 
@@ -2751,7 +2763,18 @@ static int xmit_one(struct sk_buff *skb, struct net_device *dev,
 	unsigned int len;
 	int rc;
 
+#ifndef VENDOR_EDIT
+//Junyuan.Huang@PSW.CN.WiFi.Network.1471780, 2018/06/26,
+//Modify for limit speed function
 	if (!list_empty(&ptype_all) || !list_empty(&dev->ptype_all))
+#else /* VENDOR_EDIT */
+#if defined(CONFIG_IMQ) || defined(CONFIG_IMQ_MODULE)
+	if ((!list_empty(&ptype_all) || !list_empty(&dev->ptype_all)) &&
+		!(skb->imq_flags & IMQ_F_ENQUEUE))
+#else
+	if (!list_empty(&ptype_all) || !list_empty(&dev->ptype_all))
+#endif
+#endif /* VENDOR_EDIT */
 		dev_queue_xmit_nit(skb, dev);
 
 	len = skb->len;
@@ -2789,6 +2812,14 @@ out:
 	*ret = rc;
 	return skb;
 }
+
+#ifdef VENDOR_EDIT
+//Junyuan.Huang@PSW.CN.WiFi.Network.1471780, 2018/06/26,
+//Add for limit speed function
+#if defined(CONFIG_IMQ) || defined(CONFIG_IMQ_MODULE)
+EXPORT_SYMBOL(dev_hard_start_xmit);
+#endif
+#endif /* VENDOR_EDIT */
 
 static struct sk_buff *validate_xmit_vlan(struct sk_buff *skb,
 					  netdev_features_t features)
@@ -3133,8 +3164,25 @@ static int __dev_queue_xmit(struct sk_buff *skb, void *accel_priv)
 	struct netdev_queue *txq;
 	struct Qdisc *q;
 	int rc = -ENOMEM;
+#ifdef UDP_SKT_WIFI
+	int need_wfd = (sysctl_met_is_enable == 1) && (sysctl_udp_met_port > 0);
+#endif
 
 	skb_reset_mac_header(skb);
+
+#ifdef UDP_SKT_WIFI
+	if (unlikely(need_wfd && (ip_hdr(skb)->protocol == IPPROTO_UDP) && skb->sk)) {
+		if (sysctl_udp_met_port == ntohs((inet_sk(skb->sk))->inet_sport)) {
+			struct udphdr *udp_iphdr = udp_hdr(skb);
+
+			if (udp_iphdr && (ntohs(udp_iphdr->len) >= 12)) {
+				__u16 *seq_id = (__u16 *)((char *)udp_iphdr + 10);
+
+				udp_event_trace_printk("F|%d|%s|%d\n", current->pid, *seq_id);
+			}
+		}
+	}
+#endif
 
 	if (unlikely(skb_shinfo(skb)->tx_flags & SKBTX_SCHED_TSTAMP))
 		__skb_tstamp_tx(skb, NULL, skb->sk, SCM_TSTAMP_SCHED);

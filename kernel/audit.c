@@ -403,6 +403,20 @@ static void audit_printk_skb(struct sk_buff *skb)
 	audit_hold_skb(skb);
 }
 
+
+#ifdef CONFIG_MTK_SELINUX_AEE_WARNING
+/*
+ * return skb field of audit buffer
+ */
+struct sk_buff *audit_get_skb(struct audit_buffer *ab)
+{
+	if (ab)
+		return (struct sk_buff *)(ab->skb);
+	else
+		return NULL;
+}
+#endif
+
 static void kauditd_send_skb(struct sk_buff *skb)
 {
 	int err;
@@ -888,6 +902,10 @@ static int audit_receive_msg(struct sk_buff *skb, struct nlmsghdr *nlh)
 			audit_sock = skb->sk;
 		}
 		if (s.mask & AUDIT_STATUS_RATE_LIMIT) {
+#if defined(VENDOR_EDIT) && !defined(OPPO_RELEASE_FLAG)
+//Jiemin.Zhu@PSW.Android.SELinux, 2019/01/25/, Add for disable audit limit in user version
+			return 0;
+#endif
 			err = audit_set_rate_limit(s.rate_limit);
 			if (err < 0)
 				return err;

@@ -9,6 +9,14 @@ extern int sysctl_hung_task_warnings;
 extern int proc_dohung_task_timeout_secs(struct ctl_table *table, int write,
 					 void __user *buffer,
 					 size_t *lenp, loff_t *ppos);
+#ifdef VENDOR_EDIT
+/* fanhui@PhoneSW.BSP, 2016/02/02, DeathHealer, record the hung task killing */
+extern char sysctl_hung_task_oppo_kill[];
+#endif
+#if defined(VENDOR_EDIT) && defined(CONFIG_DEATH_HEALER)
+/* Wen.Luo@BSP.Kernel.Stability, 2019/01/12, DeathHealer , Foreground background optimization,change max io count */
+extern int sysctl_hung_task_maxiowait_count;
+#endif
 #else
 /* Avoid need for ifdefs elsewhere in the code */
 enum { sysctl_hung_task_timeout_secs = 0 };
@@ -37,9 +45,9 @@ extern int sysctl_max_map_count;
 
 extern unsigned int sysctl_sched_latency;
 extern unsigned int sysctl_sched_min_granularity;
+extern unsigned int sysctl_sched_sync_hint_enable;
 extern unsigned int sysctl_sched_wakeup_granularity;
 extern unsigned int sysctl_sched_child_runs_first;
-extern unsigned int sysctl_sched_sync_hint_enable;
 extern unsigned int sysctl_sched_cstate_aware;
 #ifdef CONFIG_SCHED_WALT
 extern unsigned int sysctl_sched_use_walt_cpu_util;
@@ -47,6 +55,7 @@ extern unsigned int sysctl_sched_use_walt_task_util;
 extern unsigned int sysctl_sched_walt_init_task_load_pct;
 extern unsigned int sysctl_sched_walt_cpu_high_irqload;
 #endif
+extern unsigned int sysctl_sched_isolation_hint_enable;
 
 enum sched_tunable_scaling {
 	SCHED_TUNABLESCALING_NONE,
@@ -62,9 +71,9 @@ extern unsigned int sysctl_numa_balancing_scan_period_max;
 extern unsigned int sysctl_numa_balancing_scan_size;
 
 #ifdef CONFIG_SCHED_DEBUG
-extern unsigned int sysctl_sched_migration_cost;
-extern unsigned int sysctl_sched_nr_migrate;
-extern unsigned int sysctl_sched_time_avg;
+extern __read_mostly unsigned int sysctl_sched_migration_cost;
+extern __read_mostly unsigned int sysctl_sched_nr_migrate;
+extern __read_mostly unsigned int sysctl_sched_time_avg;
 extern unsigned int sysctl_sched_shares_window;
 
 int sched_proc_update_handler(struct ctl_table *table, int write,

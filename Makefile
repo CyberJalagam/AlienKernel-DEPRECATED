@@ -390,7 +390,8 @@ LINUXINCLUDE    := \
 		-Iarch/$(hdr-arch)/include/generated \
 		$(if $(KBUILD_SRC), -I$(srctree)/include) \
 		-Iinclude \
-		$(USERINCLUDE)
+		$(USERINCLUDE)\
+		-I$(srctree)/drivers/misc/mediatek/include
 
 KBUILD_CPPFLAGS := -D__KERNEL__
 
@@ -400,7 +401,6 @@ KBUILD_CFLAGS   := -Wall -Wundef -Wstrict-prototypes -Wno-trigraphs \
 		   -Wno-format-security \
 		   -std=gnu89 $(call cc-option,-fno-PIE)
 
-
 KBUILD_AFLAGS_KERNEL :=
 KBUILD_CFLAGS_KERNEL :=
 KBUILD_AFLAGS   := -D__ASSEMBLY__ $(call cc-option,-fno-PIE)
@@ -408,11 +408,75 @@ KBUILD_AFLAGS_MODULE  := -DMODULE
 KBUILD_CFLAGS_MODULE  := -DMODULE
 KBUILD_LDFLAGS_MODULE := -T $(srctree)/scripts/module-common.lds
 
+#ifdef  VENDOR_EDIT
+#LiPing-m@PSW.MM.Display.LCD.Machine, 2017/11/03, Add for VENDOR_EDIT macro in kernel
+KBUILD_CFLAGS +=   -DVENDOR_EDIT
+KBUILD_CPPFLAGS += -DVENDOR_EDIT
+CFLAGS_KERNEL +=   -DVENDOR_EDIT
+CFLAGS_MODULE +=   -DVENDOR_EDIT
+#endif /* VENDOR_EDIT */
+
+
+
+
+
+#ifdef VENDOR_EDIT
+#Wen.Luo@Bsp.Kernel.Stability, 2018/12/05, Add for Debug Config, slub/kmemleak/kasan config
+ifeq ($(OPPO_SLUB_CONFIG),1)
+OPPO_SLUB_TEST := true
+endif
+
+ifeq ($(OPPO_KASAN_CONFIG),1)
+OPPO_KASAN_TEST := true
+OPPO_SLUB_TEST := true
+endif
+
+ifeq ($(OPPO_KMEMLEAK_CONFIG),1)
+OPPO_KMEMLEAK_TEST := true
+endif
+
+ifeq ($(OPPO_BUILD_TYPE),release)
+    $(info  wendebug kernel release)
+    ifneq ($(SPECIAL_OPPO_CONFIG),1)
+        OPPO_SLUB_TEST :=
+        OPPO_KASAN_TEST :=
+        OPPO_KMEMLEAK_TEST :=
+    endif
+endif
+#endif /* VENDOR_EDIT */
+
+#ifdef VENDOR_EDIT
+#Qiao.Hu@BSP.CHG.Basic, 2017/12/18,add for recogonizing release build
+ifeq ($(OPPO_BUILD_TYPE),release)
+KBUILD_CFLAGS += -DCONFIG_OPPO_REALEASE_BUILD
+KBUILD_CPPFLAGS += -DCONFIG_OPPO_REALEASE_BUILD
+endif
+#endif /* VENDOR_EDIT */
+
+
+
+#Guohua.Zhong@BSP.Storage.Sdcard 2018/01/18 ,add for recogonizing release build
+ifneq ($(filter release cts cta,$(OPPO_BUILD_TYPE)),)
+KBUILD_CFLAGS += -DOPPO_RELEASE_FLAG
+KBUILD_CPPFLAGS += -DOPPO_RELEASE_FLAG
+endif
+ifneq ($(filter cmcctest cmccfield allnetcttest,$(NET_BUILD_TYPE)),)
+KBUILD_CFLAGS += -DOPPO_RELEASE_FLAG
+KBUILD_CPPFLAGS += -DOPPO_RELEASE_FLAG
+endif
+#endif /* VENDOR_EDIT */
+
+#endif//VENDOR_EDIT
 # Read KERNELRELEASE from include/config/kernel.release (if it exists)
 KERNELRELEASE = $(shell cat include/config/kernel.release 2> /dev/null)
 KERNELVERSION = $(VERSION)$(if $(PATCHLEVEL),.$(PATCHLEVEL)$(if $(SUBLEVEL),.$(SUBLEVEL)))$(EXTRAVERSION)
 
-export VERSION PATCHLEVEL SUBLEVEL KERNELRELEASE KERNELVERSION
+#ifdef VENDOR_EDIT
+#Wen.Luo@Bsp.Kernel.Stability, 2018/12/05, Add for aging test, slub debug config
+export VERSION PATCHLEVEL SUBLEVEL KERNELRELEASE KERNELVERSION OPPO_SLUB_TEST OPPO_KASAN_TEST OPPO_KMEMLEAK_TEST OPPO_AGING_TEST
+#else
+#export VERSION PATCHLEVEL SUBLEVEL KERNELRELEASE KERNELVERSION
+#endif
 export ARCH SRCARCH CONFIG_SHELL HOSTCC HOSTCFLAGS CROSS_COMPILE AS LD CC
 export CPP AR NM STRIP OBJCOPY OBJDUMP
 export MAKE AWK GENKSYMS INSTALLKERNEL PERL PYTHON UTS_MACHINE
@@ -657,7 +721,11 @@ KBUILD_CFLAGS += $(call cc-option,-fno-reorder-blocks,) \
 endif
 
 ifneq ($(CONFIG_FRAME_WARN),0)
+ifneq ($(CONFIG_KASAN), y)
 KBUILD_CFLAGS += $(call cc-option,-Wframe-larger-than=${CONFIG_FRAME_WARN})
+else
+KBUILD_CFLAGS += $(call cc-option,-Wframe-larger-than=6000)
+endif
 endif
 
 # Handle stack protector mode.
@@ -717,7 +785,7 @@ endif
 KBUILD_CFLAGS += $(CLANG_TARGET) $(CLANG_GCC_TC)
 KBUILD_AFLAGS += $(CLANG_TARGET) $(CLANG_GCC_TC)
 KBUILD_CPPFLAGS += $(call cc-option,-Qunused-arguments,)
-KBUILD_CFLAGS += $(call cc-disable-warning, unused-variable)
+KBUILD_CFLAGS += $(call cc-disable-warning, unused-const-variable)
 KBUILD_CFLAGS += $(call cc-disable-warning, format-invalid-specifier)
 KBUILD_CFLAGS += $(call cc-disable-warning, gnu)
 KBUILD_CFLAGS += $(call cc-disable-warning, address-of-packed-member)
@@ -830,6 +898,9 @@ KBUILD_CFLAGS   += $(call cc-option,-Werror=strict-prototypes)
 
 # Prohibit date/time macros, which would make the build non-deterministic
 KBUILD_CFLAGS   += $(call cc-option,-Werror=date-time)
+
+# temporary workaround clang build errors
+KBUILD_CFLAGS   += $(call cc-disable-warning,enum-conversion,)
 
 # use the deterministic mode of AR if available
 KBUILD_ARFLAGS := $(call ar-option,D)

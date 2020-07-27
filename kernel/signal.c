@@ -798,8 +798,10 @@ static bool prepare_signal(int sig, struct task_struct *p, bool force)
 	sigset_t flush;
 
 	if (signal->flags & (SIGNAL_GROUP_EXIT | SIGNAL_GROUP_COREDUMP)) {
-		if (!(signal->flags & SIGNAL_GROUP_EXIT))
-			return sig == SIGKILL;
+		if (signal->flags & SIGNAL_GROUP_COREDUMP) {
+			pr_debug("[%d:%s] is in the middle of doing coredump so skip sig %d\n", p->pid, p->comm, sig);
+			return 0;
+		}
 		/*
 		 * The process is in the middle of dying, nothing to do.
 		 */
@@ -990,6 +992,14 @@ static int __send_signal(int sig, struct siginfo *info, struct task_struct *t,
 	assert_spin_locked(&t->sighand->siglock);
 
 	result = TRACE_SIGNAL_IGNORED;
+
+#if defined(VENDOR_EDIT) && defined(CONFIG_DEATH_HEALER) && !defined(CONFIG_OPPO_SPECIAL_BUILD)
+/*fanhui@PhoneSW.BSP, 2016-06-21, DeathHealer, record the SIGSTOP sender*/
+	if (sig == SIGSTOP && (!strncmp(t->comm,"main", TASK_COMM_LEN) ||
+		!strncmp(t->comm,"system_server", TASK_COMM_LEN) || !strncmp(t->comm,"surfaceflinger", TASK_COMM_LEN)))
+		snprintf(last_stopper_comm, 64, "%s[%d]", current->comm, current->pid);
+#endif
+
 	if (!prepare_signal(sig, t,
 			from_ancestor_ns || (info == SEND_SIG_FORCED)))
 		goto ret;

@@ -15,6 +15,7 @@
 #include <linux/file.h>
 #include <linux/random.h>
 #include <asm/uaccess.h>
+#include <linux/hie.h>
 #include "ext4_jbd2.h"
 #include "ext4.h"
 
@@ -301,6 +302,10 @@ long ext4_ioctl(struct file *filp, unsigned int cmd, unsigned long arg)
 		inode->i_ctime = ext4_current_time(inode);
 
 		err = ext4_mark_iloc_dirty(handle, inode, &iloc);
+#if defined(VENDOR_EDIT) && defined(CONFIG_EXT4_ASYNC_DISCARD_SUPPORT)
+//yh@PSW.BSP.Storage.EXT4, 2018-11-26 add for ext4 async discard suppot
+	ext4_update_time(EXT4_SB(inode->i_sb));
+#endif
 flags_err:
 		ext4_journal_stop(handle);
 		if (err)
@@ -594,7 +599,11 @@ resizefs_out:
 		struct fstrim_range range;
 		int ret = 0;
 		int flags  = cmd == FIDTRIM ? BLKDEV_DISCARD_SECURE : 0;
-
+#if defined(VENDOR_EDIT) && defined(CONFIG_EXT4_ASYNC_DISCARD_SUPPORT)
+//yh@PSW.BSP.Storage.EXT4, 2018-11-26 add for ext4 async discard suppot
+		if (test_opt(sb, ASYNC_DISCARD))  
+			return 0;
+#endif
 		if (!capable(CAP_SYS_ADMIN))
 			return -EPERM;
 
@@ -696,6 +705,10 @@ encryption_policy_out:
 		err = ext4_get_policy(inode, &policy);
 		if (err)
 			return err;
+		/* for compliance to android */
+		if (S_ISDIR(inode->i_mode) &&
+			policy.contents_encryption_mode != EXT4_ENCRYPTION_MODE_INVALID)
+			policy.contents_encryption_mode = EXT4_ENCRYPTION_MODE_AES_256_XTS;
 		if (copy_to_user((void __user *)arg, &policy, sizeof(policy)))
 			return -EFAULT;
 		return 0;
