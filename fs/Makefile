@@ -3,7 +3,14 @@
 #
 # 14 Sep 2000, Christoph Hellwig <hch@infradead.org>
 # Rewritten to use lists instead of if-statements.
-#
+# 
+subdir-ccflags-y += -Werror
+#ifdef VENDOR_EDIT
+#for enable KASAN, use GCC complile tool, add flag -Wno-misleading-indentation
+ifeq ($(CONFIG_KASAN),y)
+subdir-ccflags-y += -Wno-misleading-indentation
+endif
+#endif /*VENDOR_EDIT*/
 
 obj-y :=	open.o read_write.o file_table.o super.o \
 		char_dev.o stat.o exec.o pipe.o namei.o fcntl.o \
@@ -128,3 +135,9 @@ obj-y				+= exofs/ # Multiple modules
 obj-$(CONFIG_CEPH_FS)		+= ceph/
 obj-$(CONFIG_PSTORE)		+= pstore/
 obj-$(CONFIG_EFIVAR_FS)		+= efivarfs/
+obj-$(CONFIG_RAWFS_FS)		+= rawfs/
+
+#ifdef VENDOR_EDIT
+#Xinhua.Song@BSP.Driver, 2015/04/03, Add for exfat filesystem
+obj-$(CONFIG_EXFAT_FS)		+= exfat/
+#endif /*VENDOR_EDIT*/

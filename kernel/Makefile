@@ -2,6 +2,12 @@
 # Makefile for the linux kernel.
 #
 
+subdir-ccflags-y += -Werror
+subdir-ccflags-y += -I$(srctree)/drivers/misc/mediatek/sched
+subdir-ccflags-y += -I$(srctree)/drivers/misc/mediatek/mtprof
+subdir-ccflags-y += -I$(srctree)/drivers/misc/mediatek/include
+subdir-ccflags-y += -I$(srctree)/drivers/misc/mediatek/include/mt-plat
+
 obj-y     = fork.o exec_domain.o panic.o \
 	    cpu.o exit.o softirq.o resource.o \
 	    sysctl.o sysctl_binary.o capability.o ptrace.o user.o \
@@ -40,6 +46,10 @@ obj-y += printk/
 obj-y += irq/
 obj-y += rcu/
 obj-y += livepatch/
+
+#wangzhenhua@Plf.Framework,2017/07/28, add for kevent action upload,root action upload to user layer
+obj-$(CONFIG_OPPO_KEVENT_UPLOAD) += oppo_kevent_upload.o
+obj-$(CONFIG_OPPO_KEVENT_TEST) += oppo_kevent_test.o
 
 obj-$(CONFIG_CHECKPOINT_RESTORE) += kcmp.o
 obj-$(CONFIG_FREEZER) += freezer.o

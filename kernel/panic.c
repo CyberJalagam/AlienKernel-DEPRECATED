@@ -28,6 +28,11 @@
 #define PANIC_TIMER_STEP 100
 #define PANIC_BLINK_SPD 18
 
+
+#ifdef VENDOR_EDIT
+/* Bin.Li@EXP.BSP.bootloader.bootflow, 2017/05/24, Add for interface reboot reason */
+int is_kernel_panic = 0;
+#endif
 int panic_on_oops = CONFIG_PANIC_ON_OOPS_VALUE;
 static unsigned long tainted_mask;
 static int pause_on_oops;
@@ -161,6 +166,11 @@ void panic(const char *fmt, ...)
 
 	if (!panic_blink)
 		panic_blink = no_blink;
+
+#ifdef VENDOR_EDIT
+	/* Bin.Li@EXP.BSP.bootloader.bootflow, 2017/05/24, Modify for add interface reboot reason */
+	is_kernel_panic = 1;
+#endif
 
 	if (panic_timeout > 0) {
 		/*
@@ -387,6 +397,11 @@ int oops_may_print(void)
  */
 void oops_enter(void)
 {
+#ifdef VENDOR_EDIT
+	/* Bin.Li@EXP.BSP.bootloader.bootflow, 2017/05/24, Modify for add interface reboot reason */
+	is_kernel_panic = 1;
+#endif
+
 	tracing_off();
 	/* can't trust the integrity of the kernel anymore: */
 	debug_locks_off();
@@ -503,8 +518,11 @@ EXPORT_SYMBOL(warn_slowpath_null);
  */
 __visible void __stack_chk_fail(void)
 {
+/*
 	panic("stack-protector: Kernel stack is corrupted in: %p\n",
 		__builtin_return_address(0));
+*/
+	BUG();
 }
 EXPORT_SYMBOL(__stack_chk_fail);
 
