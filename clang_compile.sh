@@ -1,16 +1,16 @@
 #!/bin/bash
 echo "Cloning dependencies if they don't exist...."
 
-if [ ! -d "./clang"]
+if [ ! -d clang ]
 git clone --depth=1 https://github.com/crdroidmod/android_prebuilts_clang_host_linux-x86_clang-5407736 clang
 
-if [ ! -d "./gcc32"]
+if [ ! -d gcc32 ]
 git clone --depth=1 https://github.com/KudProject/arm-linux-androideabi-4.9 gcc32
 
-if [ ! -d "./gcc"]
+if [ ! -d gcc ]
 git clone --depth=1 https://github.com/KudProject/aarch64-linux-android-4.9 gcc
 
-if [ ! -d "./AnyKernel"]
+if [ ! -d AnyKernel ]
 git clone https://gitlab.com/Baibhab34/AnyKernel3.git -b rm1 --depth=1 AnyKernel
 echo "Done"
 
