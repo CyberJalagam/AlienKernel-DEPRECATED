@@ -1,9 +1,17 @@
 #!/bin/bash
+
+BOLD='\033[1m'
+GRN='\033[01;32m'
+CYAN='\033[0;36m'
+YELLOW='\033[1;33m'
+RED='\033[01;31m'
+RST='\033[0m'
 echo "Cloning dependencies if they don't exist...."
 
 if [ ! -d clang ]
 then
 git clone --depth=1 https://github.com/crdroidmod/android_prebuilts_clang_host_linux-x86_clang-5407736 clang
+
 fi
 
 if [ ! -d gcc32 ]
@@ -36,6 +44,8 @@ export KBUILD_BUILD_HOST=gcp
 
 # Compile plox
 function compile() {
+
+    echo -e "${CYAN}"
     make -j$(nproc) O=out ARCH=arm64 oppo6771_17065_defconfig
     make -j$(nproc) O=out \
                     ARCH=arm64 \
@@ -43,24 +53,35 @@ function compile() {
                     CLANG_TRIPLE=aarch64-linux-gnu- \
                     CROSS_COMPILE=aarch64-linux-android- \
                     CROSS_COMPILE_ARM32=arm-linux-androideabi-
+   echo -e "${RST}"
 SUCCESS=$?
 	if [ $SUCCESS -eq 0 ]
         	then
+		echo -e "${GRN}"
+		echo "------------------------------------------------------------"
 		echo "Compilation successful..."
         	echo "Image.gz-dt can be found at out/arch/arm64/boot/Image.gz-dtb"
     		cp out/arch/arm64/boot/Image.gz-dtb AnyKernel
+		echo  "------------------------------------------------------------"
+		echo -e "${RST}"
 	else
+		echo -e "${RED}"
+                echo "------------------------------------------------------------"
 		echo "Compilation failed..check build logs for errors"
+                echo "------------------------------------------------------------"
+		echo -e "${RST}"
 	fi
 
 }
 # Zipping
 function zipping() {
+    echo -e "${YELLOW}"
     echo "Creating a flashable zip....."
     cd AnyKernel || exit 1
-    zip -r9 Stormbreaker-CPH1859-${TANGGAL}.zip * > /dev/null 2>&1
+    zip -r9 Stock-CPH1859-${TANGGAL}.zip * > /dev/null 2>&1
     cd ..
-    echo "Zip stored at AnyKernel/Stormbreaker-CPH1859-${TANGGAL}.zip"
+    echo "Zip stored at AnyKernel/Stock-CPH1859-${TANGGAL}.zip"
+    echo -e "${RST}"
 }
 compile
 
