@@ -2020,7 +2020,7 @@ void task_dirty_inc(struct task_struct *tsk);
 /* readahead.c */
 #ifndef VENDOR_EDIT
 //Qiao.Hu@BSP.BaseDrv.CHG.Basic, 2017/12/13, transplant checklist for increasing the default max readahead to speed-up reading
-#define VM_MAX_READAHEAD	128	/* kbytes */
+#define VM_MAX_READAHEAD	256	/* kbytes */
 #else
 #define VM_MAX_READAHEAD	512	/* kbytes */
 #endif /*VENDOR_EDIT*/
