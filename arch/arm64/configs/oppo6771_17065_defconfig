@@ -1,5 +1,5 @@
 CONFIG_CROSS_COMPILE="aarch64-linux-android-"
-CONFIG_LOCALVERSION="-FrancoKernel"
+CONFIG_LOCALVERSION="-FrancoKernel-r1"
 # CONFIG_LOCALVERSION_AUTO is not set
 # CONFIG_USELIB is not set
 CONFIG_SCHED_WALT=y
