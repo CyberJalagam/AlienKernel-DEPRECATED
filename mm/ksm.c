@@ -223,6 +223,12 @@ static unsigned int ksm_thread_pages_to_scan = 250;
 /* Milliseconds ksmd should sleep between batches */
 static unsigned int ksm_thread_sleep_millisecs = 1500;
 
+/* Checksum of an empty (zeroed) page */
+static unsigned int zero_checksum __read_mostly;
+
+/* Whether to merge empty (zeroed) pages with actual zero pages */
+static bool ksm_use_zero_pages __read_mostly;
+
 #ifdef CONFIG_NUMA
 /* Zeroed when merging across nodes is not allowed */
 static unsigned int ksm_merge_across_nodes = 1;
