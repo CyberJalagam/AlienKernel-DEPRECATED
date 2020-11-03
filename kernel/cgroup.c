@@ -58,6 +58,8 @@
 #include <linux/kthread.h>
 #include <linux/delay.h>
 #include <linux/cpuset.h>
+#include <linux/binfmts.h>
+#include <linux/cpu_input_boost.h>
 #include <linux/atomic.h>
 
 #if defined(CONFIG_CPUSETS) && !defined(CONFIG_MTK_ACAO)
@@ -2904,6 +2906,12 @@ static ssize_t __cgroup_procs_write(struct kernfs_open_file *of, char *buf,
 	ret = cgroup_procs_write_permission(tsk, cgrp, of);
 	if (!ret) {
 		ret = cgroup_attach_task(cgrp, tsk, threadgroup);
+		
+		/* This covers boosting for app launches and app transitions */
+	if (!ret && !threadgroup && !strcmp(of->kn->parent->name, "top-app") &&
+	    task_is_zygote(tsk->parent))
+		cpu_input_boost_kick_max(1000);
+		
 #if defined(CONFIG_CPUSETS) && !defined(CONFIG_MTK_ACAO)
 		if (cgrp->id != SS_TOP_GROUP_ID && cgrp->child_subsys_mask == CSS_CPUSET_MASK
 		&& excl_task_count > 0) {
@@ -4225,7 +4233,11 @@ int cgroup_transfer_tasks(struct cgroup *to, struct cgroup *from)
 	 */
 	do {
 		css_task_iter_start(&from->self, &it);
-		task = css_task_iter_next(&it);
+
+		do {
+			task = css_task_iter_next(&it);
+		} while (task && (task->flags & PF_EXITING));
+
 		if (task)
 			get_task_struct(task);
 		css_task_iter_end(&it);

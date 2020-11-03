@@ -39,8 +39,8 @@ BRANCH="$(git rev-parse --abbrev-ref HEAD)"
 PATH="${KERNEL_DIR}/clang/bin:${KERNEL_DIR}/gcc/bin:${KERNEL_DIR}/gcc32/bin:${PATH}"
 export KBUILD_COMPILER_STRING="$(${KERNEL_DIR}/clang/bin/clang --version | head -n 1 | perl -pe 's/\(http.*?\)//gs' | sed -e 's/  */ /g')"
 export ARCH=arm64
-export KBUILD_BUILD_USER=ayush
-export KBUILD_BUILD_HOST=gcp
+export KBUILD_BUILD_USER=jaishnav
+export KBUILD_BUILD_HOST=rbinternational
 
 # Compile plox
 function compile() {
@@ -78,9 +78,9 @@ function zipping() {
     echo -e "${YELLOW}"
     echo "Creating a flashable zip....."
     cd AnyKernel || exit 1
-    zip -r9 Stock-CPH1859-${TANGGAL}.zip * > /dev/null 2>&1
+    zip -r9 FrancoKernel-CPH1859-${TANGGAL}.zip * > /dev/null 2>&1
     cd ..
-    echo "Zip stored at AnyKernel/Stock-CPH1859-${TANGGAL}.zip"
+    echo "Zip stored at AnyKernel/FrancoKernel-CPH1859-${TANGGAL}.zip"
     echo -e "${RST}"
 }
 compile

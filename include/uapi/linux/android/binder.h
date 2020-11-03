@@ -360,6 +360,7 @@ enum binder_driver_return_protocol {
 
 	BR_OK = _IO('r', 1),
 	/* No parameters! */
+
 	BR_TRANSACTION_SEC_CTX = _IOR('r', 2,
 				      struct binder_transaction_data_secctx),
 	/*
