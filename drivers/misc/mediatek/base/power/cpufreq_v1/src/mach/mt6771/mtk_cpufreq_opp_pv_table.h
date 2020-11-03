@@ -294,7 +294,7 @@ static unsigned int fy5Tbl[NR_FREQ * NR_MT_CPU_DVFS][ARRAY_COL_SIZE] = {
 /* V5_T */
 static unsigned int fy5tTbl[NR_FREQ * NR_MT_CPU_DVFS][ARRAY_COL_SIZE] = {
 	/* Freq, Vproc, post_div, clk_div */
-	{ 1989, 80, 1, 1 },	/* L */
+	{ 2106, 80, 1, 1 },	/* L */
 	{ 1924, 76, 1, 1 },
 	{ 1846, 72, 1, 1 },
 	{ 1781, 68, 1, 1 },
