@@ -26,7 +26,7 @@ fi
 
 if [ ! -d AnyKernel ]
 then
-git clone https://gitlab.com/Baibhab34/AnyKernel3.git -b rm1 --depth=1 AnyKernel
+git clone https://gitlab.com/CyberJalagam/AnyKernel3 -b rm1 --depth=1 AnyKernel
 fi
 
 echo "Done"
@@ -78,9 +78,9 @@ function zipping() {
     echo -e "${YELLOW}"
     echo "Creating a flashable zip....."
     cd AnyKernel || exit 1
-    zip -r9 FrancoKernel-CPH1859-${TANGGAL}.zip * > /dev/null 2>&1
+    zip -r9 AlienKernel™️-CPH1859-${TANGGAL}.zip * > /dev/null 2>&1
     cd ..
-    echo "Zip stored at AnyKernel/FrancoKernel-CPH1859-${TANGGAL}.zip"
+    echo "Zip stored at AnyKernel/AlienKernel™️-CPH1859-${TANGGAL}.zip"
     echo -e "${RST}"
 }
 compile
