@@ -1,6 +1,6 @@
 VERSION = 4
 PATCHLEVEL = 4
-SUBLEVEL = 195
+SUBLEVEL = 205
 EXTRAVERSION =
 NAME = Blurry Fish Butt
 
@@ -926,6 +926,11 @@ KBUILD_CFLAGS   += $(call cc-option,-Werror=date-time)
 
 # temporary workaround clang build errors
 KBUILD_CFLAGS   += $(call cc-disable-warning,enum-conversion,)
+# ensure -fcf-protection is disabled when using retpoline as it is
+# incompatible with -mindirect-branch=thunk-extern
+ifdef CONFIG_RETPOLINE
+KBUILD_CFLAGS += $(call cc-option,-fcf-protection=none)
+endif
 
 # use the deterministic mode of AR if available
 KBUILD_ARFLAGS := $(call ar-option,D)
