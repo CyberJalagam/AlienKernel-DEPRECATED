@@ -274,6 +274,7 @@ void die(const char *str, struct pt_regs *regs, int err)
 {
 	int ret;
 	int cpu = -1;
+	unsigned long flags;	
 	static int die_owner = -1;
 	struct thread_info *thread = current_thread_info();
 
