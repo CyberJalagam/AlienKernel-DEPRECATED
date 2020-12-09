@@ -328,6 +328,9 @@ static int f2fs_link(struct dentry *old_dentry, struct inode *dir,
 	err = dquot_initialize(dir);
 	if (err)
 		return err;
+	if (f2fs_encrypted_inode(dir) &&
+		!f2fs_is_child_context_consistent_with_parent(dir, inode))
+		return -EXDEV;
 
 	f2fs_balance_fs(sbi, true);
 
@@ -819,16 +822,10 @@ static int f2fs_rename(struct inode *old_dir, struct dentry *old_dentry,
 	bool is_old_inline = f2fs_has_inline_dentry(old_dir);
 	int err = -ENOENT;
 
-	if (unlikely(f2fs_cp_error(sbi)))
-		return -EIO;
-
-	if (is_inode_flag_set(new_dir, FI_PROJ_INHERIT) &&
-			(!projid_eq(F2FS_I(new_dir)->i_projid,
-			F2FS_I(old_dentry->d_inode)->i_projid)))
-		return -EXDEV;
-
-	err = dquot_initialize(old_dir);
-	if (err)
+	if ((old_dir != new_dir) && f2fs_encrypted_inode(new_dir) &&
+		!f2fs_is_child_context_consistent_with_parent(new_dir,
+							old_inode)) {
+		err = -EXDEV;
 		goto out;
 
 	err = dquot_initialize(new_dir);
@@ -1004,8 +1001,13 @@ static int f2fs_cross_rename(struct inode *old_dir, struct dentry *old_dentry,
 	int old_nlink = 0, new_nlink = 0;
 	int err = -ENOENT;
 
-	if (unlikely(f2fs_cp_error(sbi)))
-		return -EIO;
+	if ((f2fs_encrypted_inode(old_dir) || f2fs_encrypted_inode(new_dir)) &&
+		(old_dir != new_dir) &&
+		(!f2fs_is_child_context_consistent_with_parent(new_dir,
+								old_inode) ||
+		!f2fs_is_child_context_consistent_with_parent(old_dir,
+								new_inode)))
+		return -EXDEV;
 
 	if ((is_inode_flag_set(new_dir, FI_PROJ_INHERIT) &&
 			!projid_eq(F2FS_I(new_dir)->i_projid,
