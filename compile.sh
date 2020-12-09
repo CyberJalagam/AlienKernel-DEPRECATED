@@ -16,12 +16,12 @@ fi
 
 if [ ! -d gcc32 ]
 then
-git clone --depth=1 https://github.com/KudProject/arm-linux-androideabi-4.9 gcc32
+git clone --depth=1 https://android.googlesource.com/platform/prebuilts/gcc/linux-x86/arm/arm-linux-androideabi-4.9 gcc32
 fi
 
 if [ ! -d gcc ]
 then
-git clone --depth=1 https://github.com/KudProject/aarch64-linux-android-4.9 gcc
+git clone --depth=1 https://android.googlesource.com/platform/prebuilts/gcc/linux-x86/aarch64/aarch64-linux-android-4.9 gcc
 fi
 
 if [ ! -d AnyKernel ]
@@ -32,8 +32,8 @@ fi
 echo "Done"
 
 echo "Cleaning old files in AnyKernel directory...."
-rm AnyKernel/Stock* > /dev/null
-rm AnyKernel/Image.gz-dtb > /dev/null
+rm AnyKernel/Stock* &>> /dev/null
+rm AnyKernel/Image.gz-dtb &>> /dev/null
 
 KERNEL_DIR=$(pwd)
 IMAGE="${KERNEL_DIR}/out/arch/arm64/boot/Image.gz-dtb"
@@ -46,7 +46,7 @@ export KBUILD_BUILD_USER=ayush
 export KBUILD_BUILD_HOST=gcp
 
 echo "Cleaning old Image.gz-dtb if it exists......"
-if [-f "$IMAGE"]
+if [ -f "$IMAGE" ]
 then
 rm $IMAGE
 fi
