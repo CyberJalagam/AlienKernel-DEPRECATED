@@ -1049,7 +1049,7 @@ static int ext4_ext_split(handle_t *handle, struct inode *inode,
 	__le32 border;
 	ext4_fsblk_t *ablocks = NULL; /* array of allocated blocks */
 	int err = 0;
-    size_t ext_size = 0;
+	size_t ext_size = 0;
 
 	/* make decision: where to split? */
 	/* FIXME: now decision is simplest: at current extent */
@@ -1293,7 +1293,7 @@ static int ext4_ext_grow_indepth(handle_t *handle, struct inode *inode,
 	ext4_fsblk_t newblock, goal = 0;
 	struct ext4_super_block *es = EXT4_SB(inode->i_sb)->s_es;
 	int err = 0;
-    size_t ext_size = 0;
+	size_t ext_size = 0;
 
 	/* Try to prepend new index to old one */
 	if (ext_depth(inode))
@@ -1320,7 +1320,7 @@ static int ext4_ext_grow_indepth(handle_t *handle, struct inode *inode,
 	}
 
 	ext_size = sizeof(EXT4_I(inode)->i_data);
-    /* move top-level index/leaf into new block */
+	/* move top-level index/leaf into new block */
 	memmove(bh->b_data, EXT4_I(inode)->i_data, ext_size);
 	/* zero out unused area in the extent block */
 	memset(bh->b_data + ext_size, 0, inode->i_sb->s_blocksize - ext_size);
