@@ -10,8 +10,13 @@ echo "Cloning dependencies if they don't exist...."
 
 if [ ! -d clang ]
 then
-git clone --depth=1 https://github.com/CPH1859/prebuilt_clang-6.0.2 clang
-
+	mkdir clang
+	cd clang
+	echo "Downloading clang 6.0.2 from android.googlesource.com......"
+	wget https://android.googlesource.com/platform/prebuilts/clang/host/linux-x86/+archive/android-9.0.0_r6/clang-4691093.tar.gz &>> /dev/null
+	tar -zxf clang-4691093.tar.gz &>> /dev/null
+	rm clang-4691093.tar.gz
+	cd ..
 fi
 
 if [ ! -d gcc32 ]
