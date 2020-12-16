@@ -35,8 +35,3 @@ obj-$(CONFIG_INPUT_KEYCOMBO)	+= keycombo.o
 obj-y          += misc/oppo_seccommon_drivers/
 #endif //VENDOR_EDIT
 
-#ifdef VENDOR_EDIT
-#Long.Liu@BSP.Fingerprint.Basic,2018/9/25,Add for Fingerprint Driver
-obj-$(CONFIG_OPPO_FINGERPRINT)          += oppo_fp_drivers/
-#endif //VENDOR_EDIT
-
