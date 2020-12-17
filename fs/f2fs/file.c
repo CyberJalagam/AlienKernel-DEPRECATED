@@ -1888,7 +1888,7 @@ static int f2fs_ioc_shutdown(struct file *filp, unsigned long arg)
 	}
 
 	stop_gc_thread(sbi);
-	stop_discard_thread(sbi);
+	stop_discard_thread_f2fs(sbi);
 
 	drop_discard_cmd(sbi);
 	clear_opt(sbi, DISCARD);

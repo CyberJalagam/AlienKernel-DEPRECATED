@@ -1423,7 +1423,7 @@ static void f2fs_wait_discard_bio(struct f2fs_sb_info *sbi, block_t blkaddr)
 		__wait_one_discard_bio(sbi, dc);
 }
 
-void stop_discard_thread(struct f2fs_sb_info *sbi)
+void stop_discard_thread_f2fs(struct f2fs_sb_info *sbi)
 {
 	struct discard_cmd_control *dcc = SM_I(sbi)->dcc_info;
 
@@ -1827,7 +1827,7 @@ static void destroy_discard_cmd_control(struct f2fs_sb_info *sbi)
 	if (!dcc)
 		return;
 
-	stop_discard_thread(sbi);
+	stop_discard_thread_f2fs(sbi);
 
 	kfree(dcc);
 	SM_I(sbi)->dcc_info = NULL;
