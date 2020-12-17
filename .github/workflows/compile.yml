@@ -1,0 +1,78 @@
+name: compile alps
+
+on:
+  workflow_dispatch
+  
+env:
+  DEFCONFIG: oppo6771_17065_defconfig
+  TZ: Asia/Kolkata
+  TOOLCHAIN: https://android.googlesource.com/platform/prebuilts/gcc/linux-x86/aarch64/aarch64-linux-android-4.9
+  TOOLCHAIN_GCC32: https://android.googlesource.com/platform/prebuilts/gcc/linux-x86/arm/arm-linux-androideabi-4.9
+  ARCH: arm64
+  SUBARCH: arm64
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+       - name: Checkout
+         uses: actions/checkout@master
+       
+       - name: Clean Up
+         run: |
+           docker rmi `docker images -q`
+           sudo rm -rf /usr/share/dotnet /etc/mysql /etc/php /etc/apt/sources.list.d
+           sudo -E apt-get -y purge azure-cli ghc* zulu* hhvm llvm* firefox google* dotnet* powershell openjdk* mysql* php* 
+           sudo -E apt-get update
+           sudo -E apt-get -y autoremove --purge
+           sudo -E apt-get clean 
+       - name: Initializing environment
+         run: |
+            sudo -E apt-get -qq update
+            sudo -E apt-get -qq install bc build-essential zip curl libstdc++6 git wget python gcc clang libssl-dev repo rsync flex bison ccache
+       - name: Compiling Kernel
+         run: |
+            KERNEL_DIR=$(pwd)
+            TANGGAL=$(date +"%Y%m%d-%H")
+            git clone $TOOLCHAIN --depth=1 gcc
+            git clone $TOOLCHAIN_GCC32 --depth=1 gcc32
+            git clone https://gitlab.com/Baibhab34/AnyKernel3.git -b rm1 --depth=1 AnyKernel
+            mkdir clang
+            cd clang
+            wget https://android.googlesource.com/platform/prebuilts/clang/host/linux-x86/+archive/android-9.0.0_r6/clang-4691093.tar.gz &>> /dev/null
+            tar -zxf clang-4691093.tar.gz &>> /dev/null
+            rm clang-4691093.tar.gz
+            cd ..
+            export KBUILD_COMPILER_STRING="$(${KERNEL_DIR}/clang/bin/clang --version | head -n 1 | perl -pe 's/\(http.*?\)//gs' | sed -e 's/  */ /g')"
+            PATH="${KERNEL_DIR}/clang/bin:${KERNEL_DIR}/gcc/bin:${KERNEL_DIR}/gcc32/bin:${PATH}"
+            export ARCH=$ARCH
+            export SUBARCH=$SUBARCH
+            export KBUILD_BUILD_USER=ayush
+            export KBUILD_BUILD_HOST=gh-actions
+            make clean
+            make $DEFCONFIG O=out
+            make -j8 O=out ARCH=arm64 SUBARCH=$SUBARCH CC=clang CLANG_TRIPLE=aarch64-linux-gnu- CROSS_COMPILE=aarch64-linux-android- CROSS_COMPILE_ARM32=arm-linux-androideabi-
+            cp out/arch/arm64/boot/Image.gz-dtb AnyKernel/
+            cd AnyKernel
+            zip -r9 Stock-CPH1859.zip * > /dev/null 2>&1
+          
+       - name: Release
+         id: create_release
+         uses: actions/create-release@v1
+         env:
+           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+         with:
+          tag_name: v2
+          release_name: Release 2
+          draft: false
+          prerelease: false
+       - name: Upload Release Asset
+         id: upload-release-asset
+         uses: actions/upload-release-asset@v1
+         env:
+           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+         with:
+           upload_url: ${{ steps.create_release.outputs.upload_url }} 
+           asset_path: ./AnyKernel/Stock-CPH1859.zip
+           asset_name: Stock-CPH1859.zip
+           asset_content_type: application/zip
