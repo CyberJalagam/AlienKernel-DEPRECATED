@@ -125,16 +125,35 @@ EXPORT_SYMBOL(mb_cache_entry_find_next);
  * global across all mbcaches.
  */
 
-static LIST_HEAD(mb_cache_list);
-static LIST_HEAD(mb_cache_lru_list);
-static DEFINE_SPINLOCK(mb_cache_spinlock);
+struct mb_cache {
+	/* Hash table of entries */
+	struct mb_bucket	*c_bucket;
+	/* log2 of hash table size */
+	int			c_bucket_bits;
+	/* Maximum entries in cache to avoid degrading hash too much */
+	unsigned long		c_max_entries;
+	/* Protects c_list, c_entry_count */
+	spinlock_t		c_list_lock;
+	struct list_head	c_list;
+	/* Number of entries in cache */
+	unsigned long		c_entry_count;
+	struct shrinker		c_shrink;
+	/* Work for shrinking when the cache has too many entries */
+	struct work_struct	c_shrink_work;
+};
 
-static inline void
-__spin_lock_mb_cache_entry(struct mb_cache_entry *ce)
-{
-	spin_lock(bgl_lock_ptr(mb_cache_bg_lock,
-		MB_CACHE_ENTRY_LOCK_INDEX(ce)));
-}
+struct mb_bucket {
+	struct hlist_bl_head hash;
+	struct list_head req_list;
+};
+
+struct mb_cache_req {
+	struct list_head lnode;
+	u32 e_key;
+	u64 e_value;
+};
+
+static struct kmem_cache *mb_entry_cache;
 
 static inline void
 __spin_unlock_mb_cache_entry(struct mb_cache_entry *ce)
@@ -146,22 +165,73 @@ __spin_unlock_mb_cache_entry(struct mb_cache_entry *ce)
 static inline int
 __mb_cache_entry_is_block_hashed(struct mb_cache_entry *ce)
 {
-	return !hlist_bl_unhashed(&ce->e_block_list);
+	return &cache->c_bucket[hash_32(key, cache->c_bucket_bits)].hash;
 }
 
 
 static inline void
 __mb_cache_entry_unhash_block(struct mb_cache_entry *ce)
 {
-	if (__mb_cache_entry_is_block_hashed(ce))
-		hlist_bl_del_init(&ce->e_block_list);
-}
+	struct mb_cache_entry *entry, *dup;
+	struct hlist_bl_node *dup_node;
+	struct hlist_bl_head *head;
+	struct mb_cache_req *tmp_req, req = {
+		.e_key = key,
+		.e_value = value
+	};
+	struct mb_bucket *bucket;
 
-static inline int
-__mb_cache_entry_is_index_hashed(struct mb_cache_entry *ce)
-{
-	return !hlist_bl_unhashed(&ce->e_index.o_list);
-}
+	/* Schedule background reclaim if there are too many entries */
+	if (cache->c_entry_count >= cache->c_max_entries)
+		schedule_work(&cache->c_shrink_work);
+	/* Do some sync reclaim if background reclaim cannot keep up */
+	if (cache->c_entry_count >= 2*cache->c_max_entries)
+		mb_cache_shrink(cache, SYNC_SHRINK_BATCH);
+
+	bucket = &cache->c_bucket[hash_32(key, cache->c_bucket_bits)];
+	head = &bucket->hash;
+	hlist_bl_lock(head);
+	list_for_each_entry(tmp_req, &bucket->req_list, lnode) {
+		if (tmp_req->e_key == key && tmp_req->e_value == value) {
+			hlist_bl_unlock(head);
+			return -EBUSY;
+		}
+	}
+	hlist_bl_for_each_entry(dup, dup_node, head, e_hash_list) {
+		if (dup->e_key == key && dup->e_value == value) {
+			hlist_bl_unlock(head);
+			return -EBUSY;
+		}
+	}
+	list_add(&req.lnode, &bucket->req_list);
+	hlist_bl_unlock(head);
+
+	entry = kmem_cache_alloc(mb_entry_cache, mask);
+	if (!entry) {
+		hlist_bl_lock(head);
+		list_del(&req.lnode);
+		hlist_bl_unlock(head);
+		return -ENOMEM;
+	}
+
+	*entry = (typeof(*entry)){
+		.e_list = LIST_HEAD_INIT(entry->e_list),
+		/* One ref for hash, one ref returned */
+		.e_refcnt = ATOMIC_INIT(2),
+		.e_key = key,
+		.e_value = value,
+		.e_reusable = reusable
+	};
+
+	hlist_bl_lock(head);
+	list_del(&req.lnode);
+	hlist_bl_add_head(&entry->e_hash_list, head);
+	hlist_bl_unlock(head);
+
+	spin_lock(&cache->c_list_lock);
+	list_add_tail(&entry->e_list, &cache->c_list);
+	cache->c_entry_count++;
+	spin_unlock(&cache->c_list_lock);
 
 static inline void
 __mb_cache_entry_unhash_index(struct mb_cache_entry *ce)
@@ -697,17 +767,31 @@ mb_cache_entry_get(struct mb_cache *cache, struct block_device *bdev,
 			ce->e_used += 1 + MB_CACHE_WRITER;
 			__spin_unlock_mb_cache_entry(ce);
 
-			if (!list_empty(&ce->e_lru_list)) {
-				spin_lock(&mb_cache_spinlock);
-				list_del_init(&ce->e_lru_list);
-				spin_unlock(&mb_cache_spinlock);
-			}
-			if (!__mb_cache_entry_is_block_hashed(ce)) {
-				__mb_cache_entry_release(ce);
-				return NULL;
-			}
-			return ce;
-		}
+	cache = kzalloc(sizeof(struct mb_cache), GFP_KERNEL);
+	if (!cache)
+		goto err_out;
+	cache->c_bucket_bits = bucket_bits;
+	cache->c_max_entries = bucket_count << 4;
+	INIT_LIST_HEAD(&cache->c_list);
+	spin_lock_init(&cache->c_list_lock);
+	cache->c_bucket = kmalloc(bucket_count * sizeof(*cache->c_bucket),
+				  GFP_KERNEL);
+	if (!cache->c_bucket) {
+		kfree(cache);
+		goto err_out;
+	}
+	for (i = 0; i < bucket_count; i++) {
+		INIT_HLIST_BL_HEAD(&cache->c_bucket[i].hash);
+		INIT_LIST_HEAD(&cache->c_bucket[i].req_list);
+	}
+
+	cache->c_shrink.count_objects = mb_cache_count;
+	cache->c_shrink.scan_objects = mb_cache_scan;
+	cache->c_shrink.seeks = DEFAULT_SEEKS;
+	if (register_shrinker(&cache->c_shrink)) {
+		kfree(cache->c_bucket);
+		kfree(cache);
+		goto err_out;
 	}
 	hlist_bl_unlock(block_hash_p);
 	return NULL;
@@ -802,42 +886,22 @@ mb_cache_entry_find_first(struct mb_cache *cache, struct block_device *bdev,
 }
 
 
-/*
- * mb_cache_entry_find_next()
- *
- * Find the next cache entry on a given device with a certain key in an
- * additional index. Returns NULL if no match could be found. The previous
- * entry is atomatically released, so that mb_cache_entry_find_next() can
- * be called like this:
- *
- * entry = mb_cache_entry_find_first();
- * while (entry) {
- * 	...
- *	entry = mb_cache_entry_find_next(entry, ...);
- * }
- *
- * @prev: The previous match
- * @bdev: the device the cache entry should belong to
- * @key: the key in the index
- */
-struct mb_cache_entry *
-mb_cache_entry_find_next(struct mb_cache_entry *prev,
-			 struct block_device *bdev, unsigned int key)
-{
-	struct mb_cache *cache = prev->e_cache;
-	unsigned int bucket = hash_long(key, cache->c_bucket_bits);
-	struct hlist_bl_node *l;
-	struct mb_cache_entry *ce;
-	struct hlist_bl_head *index_hash_p;
-
-	index_hash_p = &cache->c_index_hash[bucket];
-	mb_assert(prev->e_index_hash_p == index_hash_p);
-	hlist_bl_lock(index_hash_p);
-	mb_assert(!hlist_bl_empty(index_hash_p));
-	l = prev->e_index.o_list.next;
-	ce = __mb_cache_entry_find(l, index_hash_p, bdev, key);
-	__mb_cache_entry_release(prev);
-	return ce;
+	/*
+	 * We don't bother with any locking. Cache must not be used at this
+	 * point.
+	 */
+	list_for_each_entry_safe(entry, next, &cache->c_list, e_list) {
+		if (!hlist_bl_unhashed(&entry->e_hash_list)) {
+			hlist_bl_del_init(&entry->e_hash_list);
+			atomic_dec(&entry->e_refcnt);
+		} else
+			WARN_ON(1);
+		list_del(&entry->e_list);
+		WARN_ON(atomic_read(&entry->e_refcnt) != 1);
+		mb_cache_entry_put(cache, entry);
+	}
+	kfree(cache->c_bucket);
+	kfree(cache);
 }
 
 #endif  /* !defined(MB_CACHE_INDEXES_COUNT) || (MB_CACHE_INDEXES_COUNT > 0) */
