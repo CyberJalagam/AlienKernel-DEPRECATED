@@ -25,7 +25,13 @@
 #include <linux/module.h>
 #include <linux/proc_fs.h>
 
+#if CONFIG_OPPO_BSP_SECCOM_PLATFORM == 6763 || CONFIG_OPPO_BSP_SECCOM_PLATFORM == 6771 || CONFIG_OPPO_BSP_SECCOM_PLATFORM == 6779
 #include <sec_boot_lib.h>
+#elif CONFIG_OPPO_BSP_SECCOM_PLATFORM == 855
+#include <linux/soc/qcom/smem.h>
+#else
+#include <linux/soc/qcom/smem.h>
+#endif
 
 #include <linux/slab.h>
 #include <linux/seq_file.h>
@@ -140,7 +146,15 @@ static secure_type_t get_secureType(void)
                 secureType = SECURE_BOOT_ON;
         }
 
-#endif
+#elif CONFIG_OPPO_BSP_SECCOM_PLATFORM == 6771
+
+        if (g_hw_sbcen == 0) {
+                secureType = SECURE_BOOT_OFF;
+        } else {
+                secureType = SECURE_BOOT_ON;
+        }
+
+#elif  CONFIG_OPPO_BSP_SECCOM_PLATFORM == 6779
 
         if (g_hw_sbcen == 0) {
                 secureType = SECURE_BOOT_OFF;
@@ -149,12 +163,6 @@ static secure_type_t get_secureType(void)
         }
 
 #endif
-
-        if (g_hw_sbcen == 0) {
-                secureType = SECURE_BOOT_OFF;
-        } else {
-                secureType = SECURE_BOOT_ON;
-        }
 
         return secureType;
 }
