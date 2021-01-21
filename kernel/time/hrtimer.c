@@ -900,7 +900,8 @@ static int enqueue_hrtimer(struct hrtimer *timer,
 
 	base->cpu_base->active_bases |= 1 << base->index;
 
-	timer->state |= HRTIMER_STATE_ENQUEUED;
+	/* Pairs with the lockless read in hrtimer_is_queued() */
+	WRITE_ONCE(timer->state, HRTIMER_STATE_ENQUEUED);
 
 	return timerqueue_add(&base->active, &timer->node);
 }
@@ -921,8 +922,10 @@ static void __remove_hrtimer(struct hrtimer *timer,
 {
 	struct hrtimer_cpu_base *cpu_base = base->cpu_base;
 
+	/* Pairs with the lockless read in hrtimer_is_queued() */
+	WRITE_ONCE(timer->state, newstate);
 	if (!(timer->state & HRTIMER_STATE_ENQUEUED))
-		goto out;
+		return;
 
 	if (!timerqueue_del(&base->active, &timer->node))
 		cpu_base->active_bases &= ~(1 << base->index);
@@ -940,7 +943,7 @@ static void __remove_hrtimer(struct hrtimer *timer,
 		hrtimer_force_reprogram(cpu_base, 1);
 #endif
 
-out:
+
 	/*
 	* We need to preserve PINNED state here, otherwise we may end up
 	* migrating pinned hrtimers as well.
@@ -954,8 +957,9 @@ out:
 static inline int
 remove_hrtimer(struct hrtimer *timer, struct hrtimer_clock_base *base, bool restart)
 {
-	if (hrtimer_is_queued(timer)) {
-		u8 state = timer->state;
+	u8 state = timer->state;
+
+	if (state & HRTIMER_STATE_ENQUEUED) {
 		int reprogram;
 
 		/*
