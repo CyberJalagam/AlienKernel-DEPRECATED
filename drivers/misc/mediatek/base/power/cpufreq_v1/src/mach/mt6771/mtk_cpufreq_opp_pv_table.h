@@ -19,7 +19,7 @@
 /* V3 */
 static unsigned int fyTbl[NR_FREQ * NR_MT_CPU_DVFS][ARRAY_COL_SIZE] = {
 	/* Freq, Vproc, post_div, clk_div */
-	{ 2100, 80, 1, 1 },	/* L */
+	{ 1989, 80, 1, 1 },	/* L */
 	{ 1924, 76, 1, 1 },
 	{ 1846, 72, 1, 1 },
 	{ 1781, 68, 1, 1 },
@@ -34,9 +34,9 @@ static unsigned int fyTbl[NR_FREQ * NR_MT_CPU_DVFS][ARRAY_COL_SIZE] = {
 	{ 1131, 36, 2, 1 },
 	{ 1014, 32, 2, 1 },
 	{ 910,  28, 2, 1 },
-	{ 700,  24, 2, 1 },
+	{ 793,  24, 2, 1 },
 
-	{ 2100, 80, 1, 1 },	/* B */
+	{ 1989, 80, 1, 1 },	/* B */
 	{ 1924, 76, 1, 1 },
 	{ 1846, 72, 1, 1 },
 	{ 1781, 68, 1, 1 },
@@ -51,7 +51,7 @@ static unsigned int fyTbl[NR_FREQ * NR_MT_CPU_DVFS][ARRAY_COL_SIZE] = {
 	{ 1131, 36, 2, 1 },
 	{ 1014, 32, 2, 1 },
 	{ 910,  28, 2, 1 },
-	{ 700,  24, 2, 1 },
+	{ 793,  24, 2, 1 },
 
 	{ 1196, 80, 2, 1 },	/* CCI */
 	{ 1144, 76, 2, 1 },
@@ -74,7 +74,7 @@ static unsigned int fyTbl[NR_FREQ * NR_MT_CPU_DVFS][ARRAY_COL_SIZE] = {
 /* V4 & V5_1*/
 static unsigned int fy2Tbl[NR_FREQ * NR_MT_CPU_DVFS][ARRAY_COL_SIZE] = {
 	/* Freq, Vproc, post_div, clk_div */
-	{ 2100, 72, 1, 1 },	/* L */
+	{ 1989, 72, 1, 1 },	/* L */
 	{ 1924, 68, 1, 1 },
 	{ 1846, 64, 1, 1 },
 	{ 1781, 60, 1, 1 },
@@ -89,9 +89,9 @@ static unsigned int fy2Tbl[NR_FREQ * NR_MT_CPU_DVFS][ARRAY_COL_SIZE] = {
 	{ 1131, 28, 2, 1 },
 	{ 1014, 24, 2, 1 },
 	{ 910,  20, 2, 1 },
-	{ 700,  16, 2, 1 },
+	{ 793,  16, 2, 1 },
 
-	{ 2100, 77, 1, 1 },	/* B */
+	{ 1989, 77, 1, 1 },	/* B */
 	{ 1924, 73, 1, 1 },
 	{ 1846, 69, 1, 1 },
 	{ 1781, 65, 1, 1 },
@@ -106,7 +106,7 @@ static unsigned int fy2Tbl[NR_FREQ * NR_MT_CPU_DVFS][ARRAY_COL_SIZE] = {
 	{ 1131, 33, 2, 1 },
 	{ 1014, 29, 2, 1 },
 	{ 910,  25, 2, 1 },
-	{ 700,  21, 2, 1 },
+	{ 793,  21, 2, 1 },
 
 	{ 1196, 72, 2, 1 },	/* CCI */
 	{ 1144, 68, 2, 1 },
@@ -129,7 +129,7 @@ static unsigned int fy2Tbl[NR_FREQ * NR_MT_CPU_DVFS][ARRAY_COL_SIZE] = {
 /* V5_2 */
 static unsigned int fy3Tbl[NR_FREQ * NR_MT_CPU_DVFS][ARRAY_COL_SIZE] = {
 	/* Freq, Vproc, post_div, clk_div */
-	{ 2100, 76, 1, 1 },	/* L */
+	{ 1989, 76, 1, 1 },	/* L */
 	{ 1924, 72, 1, 1 },
 	{ 1846, 68, 1, 1 },
 	{ 1781, 64, 1, 1 },
@@ -144,9 +144,9 @@ static unsigned int fy3Tbl[NR_FREQ * NR_MT_CPU_DVFS][ARRAY_COL_SIZE] = {
 	{ 1131, 31, 2, 1 },
 	{ 1014, 26, 2, 1 },
 	{ 910,  21, 2, 1 },
-	{ 700,  16, 2, 1 },
+	{ 793,  16, 2, 1 },
 
-	{ 2100, 80, 1, 1 },	/* B */
+	{ 1989, 80, 1, 1 },	/* B */
 	{ 1924, 76, 1, 1 },
 	{ 1846, 72, 1, 1 },
 	{ 1781, 68, 1, 1 },
@@ -161,7 +161,7 @@ static unsigned int fy3Tbl[NR_FREQ * NR_MT_CPU_DVFS][ARRAY_COL_SIZE] = {
 	{ 1131, 36, 2, 1 },
 	{ 1014, 32, 2, 1 },
 	{ 910,  28, 2, 1 },
-	{ 700,  24, 2, 1 },
+	{ 793,  24, 2, 1 },
 
 	{ 1196, 76, 2, 1 },	/* CCI */
 	{ 1144, 72, 2, 1 },
@@ -184,7 +184,7 @@ static unsigned int fy3Tbl[NR_FREQ * NR_MT_CPU_DVFS][ARRAY_COL_SIZE] = {
 /* V5_3 */
 static unsigned int fy4Tbl[NR_FREQ * NR_MT_CPU_DVFS][ARRAY_COL_SIZE] = {
 	/* Freq, Vproc, post_div, clk_div */
-	{ 2100, 80, 1, 1 },	/* L */
+	{ 1989, 80, 1, 1 },	/* L */
 	{ 1924, 76, 1, 1 },
 	{ 1846, 72, 1, 1 },
 	{ 1781, 68, 1, 1 },
@@ -199,9 +199,9 @@ static unsigned int fy4Tbl[NR_FREQ * NR_MT_CPU_DVFS][ARRAY_COL_SIZE] = {
 	{ 1131, 33, 2, 1 },
 	{ 1014, 27, 2, 1 },
 	{ 910,  22, 2, 1 },
-	{ 700,  16, 2, 1 },
+	{ 793,  16, 2, 1 },
 
-	{ 2100, 84, 1, 1 },	/* B */
+	{ 1989, 84, 1, 1 },	/* B */
 	{ 1924, 80, 1, 1 },
 	{ 1846, 76, 1, 1 },
 	{ 1781, 72, 1, 1 },
@@ -216,7 +216,7 @@ static unsigned int fy4Tbl[NR_FREQ * NR_MT_CPU_DVFS][ARRAY_COL_SIZE] = {
 	{ 1131, 40, 2, 1 },
 	{ 1014, 36, 2, 1 },
 	{ 910,  32, 2, 1 },
-	{ 700,  28, 2, 1 },
+	{ 793,  28, 2, 1 },
 
 	{ 1196, 80, 2, 1 },	/* CCI */
 	{ 1144, 76, 2, 1 },
