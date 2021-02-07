@@ -1,6 +1,6 @@
 #
 # Automatically generated file; DO NOT EDIT.
-# Linux/arm64 4.4.206 Kernel Configuration
+# Linux/arm64 4.4.210 Kernel Configuration
 #
 CONFIG_ARM64=y
 CONFIG_64BIT=y
@@ -976,9 +976,14 @@ CONFIG_BQL=y
 # CONFIG_BPF_JIT is not set
 CONFIG_NET_FLOW_LIMIT=y
 
-#
-# Network testing
-#
+# Configure Wlan Chip ID
+WLAN_CHIP_ID=6771 
+MTK_COMBO_CHIP=CONNAC 
+CONFIG_MTK_COMBO_WIFI_HIF=axi
+MTK_ANDROID_WMT=y
+CONFIG_MTK_COMBO_CHIP=CONSYS_6771
+
+# Network
 # CONFIG_NET_PKTGEN is not set
 # CONFIG_NET_DROP_MONITOR is not set
 # CONFIG_HAMRADIO is not set
