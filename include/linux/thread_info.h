@@ -23,10 +23,8 @@ struct compat_timespec;
  * definition of current, but for !CONFIG_THREAD_INFO_IN_TASK kernels,
  * including <asm/current.h> can cause a circular dependency on some platforms.
  */
-#include <asm/current.h>
-#define current_thread_info() ((struct thread_info *)current)
-#endif
 
+#include <asm/current.h>
 #include <linux/bitops.h>
 #include <asm/thread_info.h>
 
