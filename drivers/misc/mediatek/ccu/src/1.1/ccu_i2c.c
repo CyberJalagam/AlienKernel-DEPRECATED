@@ -501,76 +501,54 @@ static void ccu_i2c_dump_info(struct mt_i2c *i2c)
 {
 	/* I2CFUC(); */
 	/* int val=0; */
-	pr_info("i2c_dump_info ++++++++++++++++++++++++++++++++++++++++++\n");
-	pr_info("I2C structure:\n"
-	       I2CTAG "Clk=%d,Id=%d,Op=%x,Irq_stat=%x,Total_len=%x\n"
-	       I2CTAG "Trans_len=%x,Trans_num=%x,Trans_auxlen=%x,speed=%d\n"
-	       I2CTAG "Trans_stop=%u\n",
-	       15600, i2c->id, i2c->op, i2c->irq_stat, i2c->total_len,
-	       i2c->msg_len, 1, i2c->msg_aux_len, i2c->speed_hz, i2c->trans_stop);
+	pr_debug("i2c_dump_info ++++++++++++++++++++++++++++++++++++++++++\n");
+	pr_debug("base address 0x%p\n", i2c->base);
+	pr_debug("I2C register:\n"
+	       I2CTAG "SLAVE_ADDR=%x,INTR_MASK=%x,INTR_STAT=%x,"
+	       I2CTAG "CONTROL=%x,TRANSFER_LEN=%x\n"
+	       I2CTAG "TRANSAC_LEN=%x,DELAY_LEN=%x,"
+	       I2CTAG "TIMING=%x,START=%x,FIFO_STAT=%x\n"
+	       I2CTAG "IO_CONFIG=%x,HS=%x,DCM_EN=%x,DEBUGSTAT=%x,"
+	       I2CTAG "EXT_CONF=%x,TRANSFER_LEN_AUX=%x\n",
+	       (i2c_readw(i2c, 0x200 + OFFSET_SLAVE_ADDR)),
+	       (i2c_readw(i2c, 0x200 + OFFSET_INTR_MASK)),
+	       (i2c_readw(i2c, 0x200 + OFFSET_INTR_STAT)),
+	       (i2c_readw(i2c, 0x200 + OFFSET_CONTROL)),
+	       (i2c_readw(i2c, 0x200 + OFFSET_TRANSFER_LEN)),
+	       (i2c_readw(i2c, 0x200 + OFFSET_TRANSAC_LEN)),
+	       (i2c_readw(i2c, 0x200 + OFFSET_DELAY_LEN)),
+	       (i2c_readw(i2c, 0x200 + OFFSET_TIMING)),
+	       (i2c_readw(i2c, 0x200 + OFFSET_START)),
+	       (i2c_readw(i2c, 0x200 + OFFSET_FIFO_STAT)),
+	       (i2c_readw(i2c, 0x200 + OFFSET_IO_CONFIG)),
+	       (i2c_readw(i2c, 0x200 + OFFSET_HS)),
+	       (i2c_readw(i2c, 0x200 + OFFSET_DCM_EN)),
+	       (i2c_readw(i2c, 0x200 + OFFSET_DEBUGSTAT)),
+	       (i2c_readw(i2c, 0x200 + OFFSET_EXT_CONF)),
+		   (i2c_readw(i2c, 0x200 + OFFSET_TRANSFER_LEN_AUX)));
 
-	pr_info("base address 0x%p\n", i2c->base);
-	pr_info("I2C register:\n"
-	       I2CTAG "SLAVE_ADDR=%x,INTR_MASK=%x,INTR_STAT=%x,CONTROL=%x,TRANSFER_LEN=%x\n"
-	       I2CTAG "TRANSAC_LEN=%x,DELAY_LEN=%x,TIMING=%x,START=%x,FIFO_STAT=%x\n"
-	       I2CTAG "IO_CONFIG=%x,HS=%x,DCM_EN=%x,DEBUGSTAT=%x,EXT_CONF=%x,TRANSFER_LEN_AUX=%x\n",
-	       (i2c_readw(i2c, OFFSET_SLAVE_ADDR)),
-	       (i2c_readw(i2c, OFFSET_INTR_MASK)),
-	       (i2c_readw(i2c, OFFSET_INTR_STAT)),
-	       (i2c_readw(i2c, OFFSET_CONTROL)),
-	       (i2c_readw(i2c, OFFSET_TRANSFER_LEN)),
-	       (i2c_readw(i2c, OFFSET_TRANSAC_LEN)),
-	       (i2c_readw(i2c, OFFSET_DELAY_LEN)),
-	       (i2c_readw(i2c, OFFSET_TIMING)),
-	       (i2c_readw(i2c, OFFSET_START)),
-	       (i2c_readw(i2c, OFFSET_FIFO_STAT)),
-	       (i2c_readw(i2c, OFFSET_IO_CONFIG)),
-	       (i2c_readw(i2c, OFFSET_HS)),
-	       (i2c_readw(i2c, OFFSET_DCM_EN)),
-	       (i2c_readw(i2c, OFFSET_DEBUGSTAT)),
-	       (i2c_readw(i2c, OFFSET_EXT_CONF)), (i2c_readw(i2c, OFFSET_TRANSFER_LEN_AUX)));
-
-	pr_info("before enable DMA register(0x%lx):\n"
-	       I2CTAG "INT_FLAG=%x,INT_EN=%x,EN=%x,RST=%x,\n"
-	       I2CTAG "STOP=%x,FLUSH=%x,CON=%x,TX_MEM_ADDR=%x, RX_MEM_ADDR=%x\n"
-	       I2CTAG "TX_LEN=%x,RX_LEN=%x,INT_BUF_SIZE=%x,DEBUG_STATUS=%x\n"
-	       I2CTAG "TX_MEM_ADDR2=%x, RX_MEM_ADDR2=%x\n",
-	       g_dma_reg.base,
-	       g_dma_reg.int_flag,
-	       g_dma_reg.int_en,
-	       g_dma_reg.en,
-	       g_dma_reg.rst,
-	       g_dma_reg.stop,
-	       g_dma_reg.flush,
-	       g_dma_reg.con,
-	       g_dma_reg.tx_mem_addr,
-	       g_dma_reg.tx_mem_addr,
-	       g_dma_reg.tx_len,
-	       g_dma_reg.rx_len,
-	       g_dma_reg.int_buf_size, g_dma_reg.debug_sta,
-	       g_dma_reg.tx_mem_addr2, g_dma_reg.tx_mem_addr2);
-	pr_info("DMA register(0x%p):\n"
+	pr_debug("DMA register(0x%p):\n"
 	       I2CTAG "INT_FLAG=%x,INT_EN=%x,EN=%x,RST=%x,\n"
 	       I2CTAG "STOP=%x,FLUSH=%x,CON=%x,TX_MEM_ADDR=%x, RX_MEM_ADDR=%x\n"
 	       I2CTAG "TX_LEN=%x,RX_LEN=%x,INT_BUF_SIZE=%x,DEBUG_STATUS=%x\n"
 	       I2CTAG "TX_MEM_ADDR2=%x, RX_MEM_ADDR2=%x\n",
 	       i2c->pdmabase,
-	       (i2c_readl_dma(i2c, OFFSET_INT_FLAG)),
-	       (i2c_readl_dma(i2c, OFFSET_INT_EN)),
-	       (i2c_readl_dma(i2c, OFFSET_EN)),
-	       (i2c_readl_dma(i2c, OFFSET_RST)),
-	       (i2c_readl_dma(i2c, OFFSET_STOP)),
-	       (i2c_readl_dma(i2c, OFFSET_FLUSH)),
-	       (i2c_readl_dma(i2c, OFFSET_CON)),
-	       (i2c_readl_dma(i2c, OFFSET_TX_MEM_ADDR)),
-	       (i2c_readl_dma(i2c, OFFSET_RX_MEM_ADDR)),
-	       (i2c_readl_dma(i2c, OFFSET_TX_LEN)),
-	       (i2c_readl_dma(i2c, OFFSET_RX_LEN)),
-	       (i2c_readl_dma(i2c, OFFSET_INT_BUF_SIZE)),
-	       (i2c_readl_dma(i2c, OFFSET_DEBUG_STA)),
-	       (i2c_readl_dma(i2c, OFFSET_TX_MEM_ADDR2)),
-	       (i2c_readl_dma(i2c, OFFSET_RX_MEM_ADDR2)));
-	pr_info("i2c_dump_info ------------------------------------------\n");
+	       (i2c_readl_dma(i2c, 0x80 + OFFSET_INT_FLAG)),
+	       (i2c_readl_dma(i2c, 0x80 + OFFSET_INT_EN)),
+	       (i2c_readl_dma(i2c, 0x80 + OFFSET_EN)),
+	       (i2c_readl_dma(i2c, 0x80 + OFFSET_RST)),
+	       (i2c_readl_dma(i2c, 0x80 + OFFSET_STOP)),
+	       (i2c_readl_dma(i2c, 0x80 + OFFSET_FLUSH)),
+	       (i2c_readl_dma(i2c, 0x80 + OFFSET_CON)),
+	       (i2c_readl_dma(i2c, 0x80 + OFFSET_TX_MEM_ADDR)),
+	       (i2c_readl_dma(i2c, 0x80 + OFFSET_RX_MEM_ADDR)),
+	       (i2c_readl_dma(i2c, 0x80 + OFFSET_TX_LEN)),
+	       (i2c_readl_dma(i2c, 0x80 + OFFSET_RX_LEN)),
+	       (i2c_readl_dma(i2c, 0x80 + OFFSET_INT_BUF_SIZE)),
+	       (i2c_readl_dma(i2c, 0x80 + OFFSET_DEBUG_STA)),
+	       (i2c_readl_dma(i2c, 0x80 + OFFSET_TX_MEM_ADDR2)),
+	       (i2c_readl_dma(i2c, 0x80 + OFFSET_RX_MEM_ADDR2)));
+	pr_debug("i2c_dump_info ------------------------------------------\n");
 
 }
 
