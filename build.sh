@@ -59,7 +59,7 @@ SUCCESS=$?
         	then
 		echo -e "${GRN}"
 		echo "------------------------------------------------------------"
-		echo "Compilation successful..."
+		echo "AlienKernel v2.0 Compilation successful..."
         	echo "Image.gz-dt can be found at out/arch/arm64/boot/Image.gz-dtb"
     		cp out/arch/arm64/boot/Image.gz-dtb AnyKernel
 		echo  "------------------------------------------------------------"
@@ -78,9 +78,9 @@ function zipping() {
     echo -e "${YELLOW}"
     echo "Creating a flashable zip....."
     cd AnyKernel || exit 1
-    zip -r9 AlienKernel™️-CPH1859-${TANGGAL}.zip * > /dev/null 2>&1
+    zip -r9 AlienKernel™️-v2.0-CPH1859-${TANGGAL}.zip * > /dev/null 2>&1
     cd ..
-    echo "Zip stored at AnyKernel/AlienKernel™️-CPH1859-${TANGGAL}.zip"
+    echo "Zip stored at AnyKernel/AlienKernel™️-v2.0-CPH1859-${TANGGAL}.zip"
     echo -e "${RST}"
 }
 compile
