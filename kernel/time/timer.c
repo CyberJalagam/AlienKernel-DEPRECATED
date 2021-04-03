@@ -1469,57 +1469,6 @@ u64 get_next_timer_interrupt(unsigned long basej, u64 basem)
 
 	return cmp_next_hrtimer_event(basem, expires);
 }
-
-/**
- * timer_clear_idle - Clear the idle state of the timer base
- *
- * Called with interrupts disabled
- */
-void timer_clear_idle(void)
-{
-	struct timer_base *base = this_cpu_ptr(&timer_bases[BASE_STD]);
-
-	/*
-	 * We do this unlocked. The worst outcome is a remote enqueue sending
-	 * a pointless IPI, but taking the lock would just make the window for
-	 * sending the IPI a few instructions smaller for the cost of taking
-	 * the lock in the exit from idle path.
-	 */
-	base->is_idle = false;
-}
-
-static int collect_expired_timers(struct timer_base *base,
-				  struct hlist_head *heads)
-{
-	unsigned long now = READ_ONCE(jiffies);
-
-	/*
-	 * NOHZ optimization. After a long idle sleep we need to forward the
-	 * base to current jiffies. Avoid a loop by searching the bitfield for
-	 * the next expiring timer.
-	 */
-	if ((long)(now - base->clk) > 2) {
-		unsigned long next = __next_timer_interrupt(base);
-
-		/*
-		 * If the next timer is ahead of time forward to current
-		 * jiffies, otherwise forward to the next expiry time:
-		 */
-		if (time_after(next, now)) {
-			/* The call site will increment clock! */
-			base->clk = now - 1;
-			return 0;
-		}
-		base->clk = next;
-	}
-	return __collect_expired_timers(base, heads);
-}
-#else
-static inline int collect_expired_timers(struct timer_base *base,
-					 struct hlist_head *heads)
-{
-	return __collect_expired_timers(base, heads);
-}
 #endif
 
 /*
