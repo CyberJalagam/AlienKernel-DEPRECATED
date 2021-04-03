@@ -10,27 +10,35 @@ echo "Cloning dependencies if they don't exist...."
 
 if [ ! -d clang ]
 then
-git clone --depth=1 https://github.com/crdroidmod/android_prebuilts_clang_host_linux-x86_clang-5407736 clang
-
+	mkdir clang
+	cd clang
+	echo "Downloading clang 6.0.2 from android.googlesource.com......"
+	wget https://android.googlesource.com/platform/prebuilts/clang/host/linux-x86/+archive/android-9.0.0_r6/clang-4691093.tar.gz &>> /dev/null
+	tar -zxf clang-4691093.tar.gz &>> /dev/null
+	rm clang-4691093.tar.gz
+	cd ..
 fi
 
 if [ ! -d gcc32 ]
 then
-git clone --depth=1 https://github.com/KudProject/arm-linux-androideabi-4.9 gcc32
+git clone --depth=1 https://android.googlesource.com/platform/prebuilts/gcc/linux-x86/arm/arm-linux-androideabi-4.9 gcc32
 fi
 
 if [ ! -d gcc ]
 then
-git clone --depth=1 https://github.com/KudProject/aarch64-linux-android-4.9 gcc
+git clone --depth=1 https://android.googlesource.com/platform/prebuilts/gcc/linux-x86/aarch64/aarch64-linux-android-4.9 gcc
 fi
 
 if [ ! -d AnyKernel ]
 then
-git clone https://gitlab.com/CyberJalagam/AnyKernel3 -b rm1 --depth=1 AnyKernel
+git clone https://gitlab.com/CyberJalagam/AnyKernel3.git -b rm1 --depth=1 AnyKernel
 fi
 
 echo "Done"
 
+echo "Cleaning old files in AnyKernel directory...."
+rm AnyKernel/Stock* &>> /dev/null
+rm AnyKernel/Image.gz-dtb &>> /dev/null
 
 KERNEL_DIR=$(pwd)
 IMAGE="${KERNEL_DIR}/out/arch/arm64/boot/Image.gz-dtb"
@@ -41,6 +49,13 @@ export KBUILD_COMPILER_STRING="$(${KERNEL_DIR}/clang/bin/clang --version | head 
 export ARCH=arm64
 export KBUILD_BUILD_USER=jaishnav
 export KBUILD_BUILD_HOST=rbinternational
+
+echo "Cleaning old Image.gz-dtb if it exists......"
+if [ -f "$IMAGE" ]
+then
+rm $IMAGE
+fi
+
 
 # Compile plox
 function compile() {
@@ -55,11 +70,11 @@ function compile() {
                     CROSS_COMPILE_ARM32=arm-linux-androideabi-
    echo -e "${RST}"
 SUCCESS=$?
-	if [ $SUCCESS -eq 0 ]
+	if [ $SUCCESS -eq 0 ] && [ -f "$IMAGE" ]
         	then
 		echo -e "${GRN}"
 		echo "------------------------------------------------------------"
-		echo "Compilation successful..."
+		echo "AlienKernel v2.0 Compilation successful..."
         	echo "Image.gz-dt can be found at out/arch/arm64/boot/Image.gz-dtb"
     		cp out/arch/arm64/boot/Image.gz-dtb AnyKernel
 		echo  "------------------------------------------------------------"
@@ -78,14 +93,14 @@ function zipping() {
     echo -e "${YELLOW}"
     echo "Creating a flashable zip....."
     cd AnyKernel || exit 1
-    zip -r9 AlienKernel™️-CPH1859-${TANGGAL}.zip * > /dev/null 2>&1
+    zip -r9 AlienKernel™️-v2.0-CPH1859-${TANGGAL}.zip * > /dev/null 2>&1
     cd ..
-    echo "Zip stored at AnyKernel/AlienKernel™️-CPH1859-${TANGGAL}.zip"
+    echo "Zip stored at AnyKernel/AlienKernel-v2.0-CPH1859-${TANGGAL}.zip"
     echo -e "${RST}"
 }
 compile
 
-if [ $SUCCESS -eq 0 ]
+if [ $SUCCESS -eq 0 ] && [ -f "$IMAGE" ]
 then
 	zipping
 fi
