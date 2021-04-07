@@ -105,8 +105,6 @@ enum {
 	CMC_TRC_DEBUG = 0x8000,
 } CMC_TRC;
 
-#ifndef VENDOR_EDIT
-/*Fei.Mo@PSW.BSP.Sensor, 2017/12/17, Modify for get alsps value to engineer mode*/
 long alspshub_read_ps(u8 *ps)
 {
 	long res;
@@ -141,28 +139,6 @@ long alspshub_read_als(u16 *als)
 
 	return 0;
 }
-#else
-long alspshub_read_ps(int *ps)
-{
-	long res;
-	struct alspshub_ipi_data *obj = obj_ipi_data;
-	struct data_unit_t data_t;
-
-	res = sensor_get_data_from_hub(ID_PROXIMITY, &data_t);
-	if (res < 0) {
-		*ps = -1;
-		APS_PR_ERR("sensor_get_data_from_hub fail, (ID: %d)\n", ID_PROXIMITY);
-		return -1;
-	}
-
-	//APS_PR_ERR("ps0 = %d, ps1 = %d\n", data_t.proximity_t.steps & 0xffff, data_t.proximity_t.steps >> 16);
-
-	if (data_t.proximity_t.steps < obj->ps_cali)
-		*ps = 0;
-	else
-		*ps = data_t.proximity_t.steps - obj->ps_cali;
-	return 0;
-}
 
 long alspshub_read_ps_state(int *ps)
 {
@@ -182,24 +158,6 @@ long alspshub_read_ps_state(int *ps)
 
     return 0;
 }
-
-long alspshub_read_als(u16 *als)
-{
-	long res = 0;
-	struct data_unit_t data_t;
-
-	res = sensor_get_data_from_hub(ID_LIGHT, &data_t);
-	if (res < 0) {
-		*als = -1;
-		APS_PR_ERR("sensor_set_cmd_to_hub fail, (ID: %d),(action: %d)\n", ID_LIGHT, CUST_ACTION_GET_RAW_DATA);
-		return -1;
-	}
-
-	*als = data_t.data[0];//als raw data;
-	APS_PR_ERR("alspshub_read_als:als_raw data = %d\n",*als);
-	return 0;
-}
-#endif /* VENDOR_EDIT */
 
 static ssize_t alspshub_show_trace(struct device_driver *ddri, char *buf)
 {
@@ -725,7 +683,7 @@ static int alshub_factory_clear_cali(void)
 {
 	return 0;
 }
-static int alshub_factory_set_cali(int32_t als_factor)
+static int alshub_factory_set_cali(int32_t offset)
 {
 	struct alspshub_ipi_data *obj = obj_ipi_data;
 	int err = 0;
@@ -743,22 +701,9 @@ static int alshub_factory_set_cali(int32_t als_factor)
 
 }
 
-static int alshub_factory_get_cali(int32_t data[6])
+static int alshub_factory_get_cali(int32_t *offset)
 {
 	struct alspshub_ipi_data *obj = obj_ipi_data;
-#ifdef VENDOR_EDIT
-/*zhq@PSW.BSP.Sensor, 2018/10/28, Add for als ps cail*/
-    get_sensor_parameter(ID_LIGHT ,&obj->als_factor);
-
-	spin_lock(&calibration_lock);
-	data[0] = obj->als_factor;
-	data[1] = 0;
-	data[2] = 0;
-	data[3] = 0;
-	data[4] = 0;
-	data[5] = 0;
-	spin_unlock(&calibration_lock);
-#endif
 
 	*offset = atomic_read(&obj->als_cali);
 	return 0;
