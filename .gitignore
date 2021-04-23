@@ -122,4 +122,5 @@ clang/
 gcc/
 gcc32/
 AnyKernel/
-
+buildlog.txt
+log.txt
