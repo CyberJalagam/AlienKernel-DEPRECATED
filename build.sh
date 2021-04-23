@@ -8,10 +8,16 @@ RED='\033[01;31m'
 RST='\033[0m'
 echo "Cloning dependencies if they don't exist...."
 
+if [ ! -d out ]
+then
+echo "clean"
+else
+rm -rf AnyKernel
+fi 
+
 if [ ! -d clang ]
 then
 git clone --depth=1 https://github.com/crdroidmod/android_prebuilts_clang_host_linux-x86_clang-5407736 clang
-
 fi
 
 if [ ! -d gcc32 ]
@@ -59,7 +65,7 @@ SUCCESS=$?
         	then
 		echo -e "${GRN}"
 		echo "------------------------------------------------------------"
-		echo "Compilation successful..."
+		echo "Compilation successful, Aliens invaded"
         	echo "Image.gz-dt can be found at out/arch/arm64/boot/Image.gz-dtb"
     		cp out/arch/arm64/boot/Image.gz-dtb AnyKernel
 		echo  "------------------------------------------------------------"
@@ -67,7 +73,7 @@ SUCCESS=$?
 	else
 		echo -e "${RED}"
                 echo "------------------------------------------------------------"
-		echo "Compilation failed..check build logs for errors"
+		echo "Compilation failed, Earth is safe!"
                 echo "------------------------------------------------------------"
 		echo -e "${RST}"
 	fi
@@ -76,11 +82,11 @@ SUCCESS=$?
 # Zipping
 function zipping() {
     echo -e "${YELLOW}"
-    echo "Creating a flashable zip....."
+    echo "Alien invasion in progress... "
     cd AnyKernel || exit 1
-    zip -r9 AlienKernel™️-CPH1859-${TANGGAL}.zip * > /dev/null 2>&1
+    zip -r9 AlienKernel™️-v2.1-CPH1859-${TANGGAL}.zip * > /dev/null 2>&1
     cd ..
-    echo "Zip stored at AnyKernel/AlienKernel™️-CPH1859-${TANGGAL}.zip"
+    echo "Aliens stored at AnyKernel/AlienKernel™️-v2.1-CPH1859-${TANGGAL}.zip"
     echo -e "${RST}"
 }
 compile
