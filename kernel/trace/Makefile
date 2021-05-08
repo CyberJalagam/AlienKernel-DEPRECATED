@@ -76,6 +76,3 @@ obj-$(CONFIG_TRACEPOINT_BENCHMARK) += trace_benchmark.o
 libftrace-y := ftrace.o
 
 obj-$(CONFIG_TRACING) += mtk_trace.o
-ifeq ($(CONFIG_ANDROID),y)
-CFLAGS_trace.o += -DCONFIG_DEBUG_FS
-endif
