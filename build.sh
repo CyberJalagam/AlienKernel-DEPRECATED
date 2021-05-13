@@ -17,7 +17,7 @@ fi
 
 if [ ! -d clang ]
 then
-git clone --depth=1 https://github.com/crdroidmod/android_prebuilts_clang_host_linux-x86_clang-5407736 clang
+git clone --depth=1 https://github.com/kardebayan/android_prebuilts_clang_host_linux-x86_clang-5696680 clang
 fi
 
 if [ ! -d gcc32 ]
