@@ -85,9 +85,9 @@ function zipping() {
     echo -e "${YELLOW}"
     echo "Alien invasion in progress... "
     cd AnyKernel || exit 1
-    zip -r9 AlienKernel™️-v2.1-CPH1859-${TANGGAL}.zip * > /dev/null 2>&1
+    zip -r9 AlienKernel™️-v2.2-CPH1859-${TANGGAL}.zip * > /dev/null 2>&1
     cd ..
-    echo "Aliens stored at AnyKernel/AlienKernel™️-v2.1-CPH1859-${TANGGAL}.zip"
+    echo "Aliens stored at AnyKernel/AlienKernel™️-v2.2-CPH1859-${TANGGAL}.zip"
     echo -e "${RST}"
 }
 compile
